@@ -929,8 +929,8 @@
       }
 
       body.ui-mobile .app {
-        min-height: 100svh;
-        height: 100svh;
+        min-height: var(--mobile-vh, 100svh);
+        height: var(--mobile-vh, 100svh);
         grid-template-rows: minmax(0, 1fr);
         gap: 0;
         padding: 0;
@@ -941,8 +941,9 @@
         width: 100%;
         height: 100%;
         padding: 0;
-        gap: 2px;
-        grid-template-rows: auto minmax(0, 1fr) auto;
+        gap: 0;
+        grid-template-rows: minmax(0, 1fr) auto;
+        justify-items: center;
         align-content: start;
         overflow: hidden;
         border: 0;
@@ -962,9 +963,7 @@
       }
 
       body.ui-mobile .arena-topline {
-        width: 100%;
-        gap: 4px 8px;
-        min-height: 18px;
+        display: none;
       }
 
       body.ui-mobile .arena-mini {
@@ -996,10 +995,10 @@
       }
 
       body.ui-mobile .arena-wrap {
-        width: min(100%, calc((var(--mobile-vh, 100svh) - 68px) * 1.5));
+        width: min(100vw, calc((var(--mobile-vh, 100svh) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 30px) * 1.5));
         min-height: 0;
-        height: auto;
-        max-height: calc(var(--mobile-vh, 100svh) - 68px);
+        height: min(calc(var(--mobile-vh, 100svh) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 30px), calc(100vw / 1.5));
+        max-height: calc(var(--mobile-vh, 100svh) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 30px);
         aspect-ratio: 12 / 8;
         border-radius: 0;
         padding: 0;
@@ -1128,6 +1127,7 @@
         text-align: center;
         box-shadow: 0 10px 18px rgba(33, 28, 18, 0.18);
         z-index: 4;
+        margin-top: 0;
       }
 
       body.ui-mobile .card-rack {
@@ -1206,21 +1206,18 @@
 
       @media (orientation: landscape) and (max-height: 500px) {
         body.ui-mobile .app {
-          padding: 2px;
+          padding: 0;
         }
 
         body.ui-mobile .battle-panel {
-          padding: 2px;
-          gap: 2px;
-        }
-
-        body.ui-mobile .arena-topline {
-          min-height: 16px;
+          padding: 0;
+          gap: 0;
         }
 
         body.ui-mobile .arena-wrap {
-          width: min(100%, calc((var(--mobile-vh, 100svh) - 50px) * 1.5));
-          max-height: calc(var(--mobile-vh, 100svh) - 50px);
+          width: min(100vw, calc((var(--mobile-vh, 100svh) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 22px) * 1.5));
+          height: min(calc(var(--mobile-vh, 100svh) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 22px), calc(100vw / 1.5));
+          max-height: calc(var(--mobile-vh, 100svh) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 22px);
         }
 
         body.ui-mobile .mobile-top-dock {
@@ -2412,7 +2409,18 @@
       }
 
       function defaultHoverText() {
-        return state.uiProfile === "mobile" ? "長按單位可看資訊" : "滑鼠移入或手機長按可看資訊";
+        if (state.uiProfile !== "mobile") return "滑鼠移入或手機長按可看資訊";
+        if (state.event) return `事件：${state.event.label}｜長按單位可看資訊`;
+        if (state.phase === "prep") return `倒數 ${Math.ceil(Math.max(0, state.countdown))}s｜長按單位可看資訊`;
+        if (state.phase === "combat") return "戰鬥進行中｜長按單位可看資訊";
+        return "長按單位可看資訊";
+      }
+
+      function shouldCarryStageRun(targetValue) {
+        if (state.phase !== "victory" || state.mode !== "stage") return false;
+        if (!targetValue || targetValue === "endless") return false;
+        const targetId = Number(targetValue.split("-")[1]);
+        return targetId === state.stage.id + 1;
       }
 
       function syncPauseButtons() {
@@ -2553,9 +2561,11 @@
         document.getElementById("closeInfoBtn").addEventListener("click", closeInfoModal);
         document.getElementById("closeHandBtn").addEventListener("click", () => { ui.handModal.hidden = true; });
         ui.sellTowerBtn.addEventListener("click", sellInfoTower);
-        document.getElementById("loadStageBtn").addEventListener("click", () => { loadSelectedStage(ui.stageSelect.value); });
+        document.getElementById("loadStageBtn").addEventListener("click", () => {
+          loadSelectedStage(ui.stageSelect.value, { carryRun: shouldCarryStageRun(ui.stageSelect.value) });
+        });
         document.getElementById("mobileLoadStageBtn").addEventListener("click", () => {
-          loadSelectedStage(ui.mobileStageSelect.value);
+          loadSelectedStage(ui.mobileStageSelect.value, { carryRun: shouldCarryStageRun(ui.mobileStageSelect.value) });
           ui.mobileStageModal.hidden = true;
         });
         document.getElementById("mobileStageBtn").addEventListener("click", () => {
@@ -2580,7 +2590,7 @@
         document.getElementById("summaryNextBtn").addEventListener("click", () => {
           ui.summaryModal.hidden = true;
           if (state.mode === "stage" && state.stageIndex < STAGES.length - 1) {
-            loadSelectedStage(`stage-${state.stageIndex + 2}`);
+            loadSelectedStage(`stage-${state.stageIndex + 2}`, { carryRun: true });
           }
         });
         document.getElementById("summaryCloseBtn").addEventListener("click", () => { ui.summaryModal.hidden = true; });
@@ -2615,7 +2625,7 @@
         });
       }
 
-      function loadSelectedStage(value) {
+      function loadSelectedStage(value, options = {}) {
         ui.stageSelect.value = value;
         ui.mobileStageSelect.value = value;
         if (value === "endless") {
@@ -2626,17 +2636,20 @@
           state.mode = "stage";
           state.stageIndex = Math.max(0, id - 1);
         }
-        resetRun();
+        resetRun(options);
       }
 
-      function resetRun() {
+      function resetRun(options = {}) {
+        const carryRun = !!options.carryRun;
+        const carriedScore = carryRun ? state.score : 0;
+        const carriedTotalScore = carryRun ? state.totalScore : 0;
         state.stage = STAGES[state.stageIndex];
         state.stageWave = 1;
         state.endlessWave = 1;
         state.fortressHpMax = fortressHpForStage(state.mode === "stage" ? state.stage.id : 6);
         state.fortressHp = state.fortressHpMax;
-        state.score = startingScoreForStage(state.mode === "stage" ? state.stage.id : 6, state.mode);
-        state.totalScore = 0;
+        state.score = carryRun ? carriedScore : startingScoreForStage(state.mode === "stage" ? state.stage.id : 6, state.mode);
+        state.totalScore = carryRun ? carriedTotalScore : 0;
         state.kills = 0;
         state.phase = "prep";
         state.countdown = 10;
@@ -3549,6 +3562,7 @@
       function finishRun(victory) {
         state.runEnded = true;
         state.phase = victory ? "victory" : "over";
+        if (!victory) state.score = 0;
         state.enemies = [];
         state.projectiles = [];
         state.spawnQueue = [];
