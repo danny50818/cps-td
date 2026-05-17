@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: frontline-guardian
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: LEADERBOARD_GAME_ID
+        value: frontline-guardian-v4
