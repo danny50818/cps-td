@@ -1,0 +1,4338 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>守護線 Frontline Guardian</title>
+    <style>
+      :root {
+        --bg: #f3ede2;
+        --panel: #fffaf2;
+        --panel-soft: #f8f2e8;
+        --line: #d6c6ae;
+        --ink: #23323a;
+        --muted: #6e787d;
+        --accent: #cc724d;
+        --accent-deep: #b85f3d;
+        --safe: #5f9084;
+        --danger: #b65249;
+        --shadow: 0 12px 28px rgba(68, 46, 24, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      body {
+        font-family: "Noto Sans TC", "PingFang TC", sans-serif;
+        color: var(--ink);
+        background:
+          linear-gradient(180deg, rgba(204, 114, 77, 0.1), transparent 22%),
+          linear-gradient(180deg, #f8f4ec, #efe5d4 100%);
+      }
+
+      button,
+      select,
+      input {
+        font: inherit;
+      }
+
+      .app {
+        min-height: 100dvh;
+        height: 100dvh;
+        padding: 10px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr) auto;
+        gap: 10px;
+        max-width: 1600px;
+        margin: 0 auto;
+      }
+
+      .sidebar {
+        display: grid;
+        gap: 10px;
+        min-height: 0;
+        overflow: auto;
+        padding-right: 2px;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .topbar {
+        padding: 12px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .brand h1 {
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.2;
+      }
+
+      .brand p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .top-actions,
+      .inline-actions,
+      .modal-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .stagebar {
+        padding: 10px 12px;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .stage-row {
+        display: grid;
+        gap: 8px;
+      }
+
+      .stage-meta strong {
+        display: block;
+        font-size: 18px;
+      }
+
+      .stage-meta span {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .stage-picker {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
+        align-items: center;
+      }
+
+      select,
+      input {
+        width: 100%;
+        min-width: 0;
+        padding: 9px 10px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: white;
+        color: var(--ink);
+      }
+
+      button {
+        border: 0;
+        border-radius: 12px;
+        padding: 9px 12px;
+        background: var(--accent);
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      button.secondary {
+        background: #edf3f1;
+        color: var(--safe);
+        border: 1px solid #c8ded7;
+      }
+
+      button.ghost {
+        background: white;
+        color: var(--ink);
+        border: 1px solid var(--line);
+      }
+
+      button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .hud {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .side-hud {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .stat {
+        padding: 8px 9px;
+        border-radius: 14px;
+        background: var(--panel-soft);
+        border: 1px solid #e8dcc9;
+        min-width: 0;
+      }
+
+      .stat small {
+        display: block;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .stat strong {
+        display: block;
+        margin-top: 4px;
+        font-size: clamp(14px, 3vw, 20px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .battle-panel {
+        padding: 10px;
+        display: grid;
+        gap: 8px;
+        min-height: 0;
+      }
+
+      .note-box {
+        padding: 10px 12px;
+        border-radius: 14px;
+        background: #fbf6ee;
+        border: 1px solid #e8dcc8;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .note-box strong {
+        color: var(--accent);
+      }
+
+      .arena-wrap {
+        position: relative;
+        min-height: 0;
+        height: 100%;
+        aspect-ratio: 12 / 8;
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid #cfbea6;
+        background: #d8e5d2;
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+
+      .arena-topline {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 12px;
+        align-items: center;
+        justify-content: flex-start;
+        min-width: 0;
+      }
+
+      .arena-mini {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+        justify-content: flex-start;
+      }
+
+      .arena-center {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 12px;
+        align-items: center;
+        min-width: 0;
+      }
+
+      .note-box.compact {
+        max-width: 100%;
+        padding: 0;
+        border: 0;
+        background: none;
+        box-shadow: none;
+        font-size: 11px;
+        line-height: 1.4;
+      }
+
+      .phase-badge {
+        background: none;
+        color: var(--ink);
+        border: 0;
+        width: fit-content;
+        padding: 0;
+        font-weight: 800;
+      }
+
+      .hint-badge {
+        max-width: 100%;
+        padding: 0;
+        border-radius: 0;
+        background: none;
+        color: var(--accent-deep);
+        font-size: 11px;
+        font-weight: 700;
+        text-align: left;
+      }
+
+      .card-rack {
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 3;
+      }
+
+      .card-chip {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        border: 1px solid rgba(177, 152, 122, 0.85);
+        background: rgba(255, 250, 242, 0.94);
+        color: var(--ink);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        font-weight: 800;
+        box-shadow: 0 10px 22px rgba(33, 28, 18, 0.18);
+        cursor: pointer;
+        user-select: none;
+        touch-action: manipulation;
+      }
+
+      .card-chip.empty {
+        opacity: 0.42;
+        cursor: default;
+      }
+
+      .card-count {
+        min-width: 28px;
+        padding: 6px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(177, 152, 122, 0.85);
+        background: rgba(255, 250, 242, 0.94);
+        font-size: 12px;
+        font-weight: 700;
+        text-align: center;
+        color: var(--ink);
+      }
+
+      .badge {
+        padding: 8px 10px;
+        border-radius: 12px;
+        background: rgba(255, 250, 242, 0.92);
+        border: 1px solid rgba(177, 152, 122, 0.62);
+        font-size: 12px;
+      }
+
+      .dock {
+        padding: 10px;
+        display: grid;
+        gap: 8px;
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      .dock-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .dock-header strong {
+        font-size: 15px;
+      }
+
+      .dock-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        min-height: 0;
+        overflow: auto;
+        align-content: start;
+        padding-right: 2px;
+      }
+
+      .tower-card {
+        position: relative;
+        min-height: 74px;
+        padding: 8px;
+        border-radius: 16px;
+        border: 1px solid #e8dcc8;
+        background: #fff7ed;
+        user-select: none;
+        touch-action: none;
+        display: grid;
+        grid-template-rows: auto auto;
+        gap: 6px;
+      }
+
+      .tower-card.locked {
+        opacity: 0.42;
+        filter: grayscale(0.6);
+        background: #edf0eb;
+        border-color: #c8cfca;
+        place-items: center;
+        cursor: default;
+      }
+
+      .tower-card.locked .tower-visual {
+        grid-template-columns: 1fr;
+        justify-items: center;
+      }
+
+      .tower-card.locked .tower-icon {
+        box-shadow: inset 0 -4px 8px rgba(0, 0, 0, 0.08);
+      }
+
+      .tower-card.dragging {
+        outline: 2px solid var(--accent);
+      }
+
+      .tower-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 6px;
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      .tower-visual {
+        display: grid;
+        grid-template-columns: 42px 1fr;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .tower-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: 800;
+        color: white;
+        box-shadow: inset 0 -6px 10px rgba(0, 0, 0, 0.12);
+      }
+
+      .tower-label {
+        min-width: 0;
+      }
+
+      .tower-label strong {
+        display: block;
+        font-size: 13px;
+        line-height: 1.1;
+      }
+
+      .tower-label span {
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 11px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .info-strip {
+        display: flex;
+        gap: 8px;
+        overflow: hidden;
+      }
+
+      .pill {
+        padding: 0;
+        border-radius: 0;
+        background: none;
+        border: 0;
+        font-size: 11px;
+        color: var(--muted);
+        white-space: nowrap;
+        font-weight: 700;
+      }
+
+      .drag-ghost {
+        position: fixed;
+        z-index: 80;
+        left: 0;
+        top: 0;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        min-width: 118px;
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        background: rgba(31, 44, 52, 0.95);
+        color: white;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.26);
+      }
+
+      .drag-ghost[hidden] {
+        display: none;
+      }
+
+      .modal,
+      .toast {
+        position: fixed;
+        z-index: 90;
+      }
+
+      .modal {
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px;
+        background: rgba(31, 35, 39, 0.48);
+      }
+
+      .modal[hidden] {
+        display: none;
+      }
+
+      .dialog {
+        width: min(760px, 100%);
+        max-height: min(90dvh, 760px);
+        overflow: auto;
+        padding: 18px;
+        border-radius: 22px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        box-shadow: 0 24px 48px rgba(30, 22, 12, 0.22);
+      }
+
+      .dialog h2 {
+        margin: 0 0 10px;
+        font-size: 24px;
+      }
+
+      .dialog p {
+        margin: 0 0 10px;
+        line-height: 1.75;
+        color: #4a5a61;
+      }
+
+      .reward-grid,
+      .board-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .reward-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .reward-card,
+      .board-row,
+      .log-row {
+        padding: 12px;
+        border-radius: 16px;
+        background: var(--panel-soft);
+        border: 1px solid #e8dcc9;
+      }
+
+      .reward-card h3,
+      .log-row strong {
+        margin: 0 0 8px;
+      }
+
+      .reward-card p,
+      .log-row p {
+        margin: 0 0 10px;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .enemy-guide-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .enemy-guide-card {
+        padding: 12px;
+        border-radius: 16px;
+        background: var(--panel-soft);
+        border: 1px solid #e8dcc9;
+      }
+
+      .enemy-guide-top {
+        display: grid;
+        grid-template-columns: 1fr 146px;
+        gap: 10px;
+        align-items: start;
+        margin-bottom: 10px;
+      }
+
+      .enemy-guide-card h3 {
+        margin: 0 0 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 16px;
+      }
+
+      .enemy-swatch {
+        width: 14px;
+        height: 14px;
+        border-radius: 999px;
+        flex: 0 0 auto;
+      }
+
+      .enemy-guide-meta {
+        display: grid;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--ink);
+      }
+
+      .enemy-guide-meta span {
+        color: var(--muted);
+      }
+
+      .enemy-guide-meta .danger-mark {
+        color: var(--danger);
+        font-weight: 800;
+      }
+
+      .enemy-radar {
+        width: 146px;
+        height: 128px;
+      }
+
+      .enemy-radar text {
+        font-size: 9px;
+        fill: var(--muted);
+      }
+
+      .board-head,
+      .board-row {
+        display: grid;
+        grid-template-columns: 34px 1fr 72px 58px;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .board-head {
+        color: var(--muted);
+        font-size: 12px;
+        padding: 0 4px 6px;
+      }
+
+      .rank {
+        color: var(--accent);
+        font-weight: 800;
+      }
+
+      .form-grid {
+        display: grid;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .toast {
+        left: 50%;
+        top: 18px;
+        transform: translateX(-50%);
+        max-width: min(420px, calc(100% - 28px));
+        padding: 13px 15px;
+        border-radius: 16px;
+        background: #25343d;
+        color: white;
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.24);
+      }
+
+      .toast[hidden] {
+        display: none;
+      }
+
+      @media (max-width: 900px) {
+        .app {
+          padding: 8px;
+          gap: 8px;
+          grid-template-rows: minmax(300px, 42dvh) minmax(0, 1fr);
+        }
+
+        .sidebar,
+        .topbar,
+        .stagebar {
+          grid-template-columns: 1fr;
+        }
+
+        .hud {
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+        }
+
+        .arena-wrap {
+          height: 100%;
+          aspect-ratio: auto;
+        }
+
+        .arena-topline {
+          gap: 6px;
+        }
+
+        .arena-mini {
+          justify-content: flex-start;
+        }
+
+        .hint-badge {
+          max-width: min(340px, calc(100vw - 48px));
+        }
+
+        .reward-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .enemy-guide-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .enemy-guide-top {
+          grid-template-columns: 1fr;
+        }
+
+        .top-actions {
+          justify-content: flex-start;
+        }
+      }
+
+      @media (min-width: 981px) {
+        .app {
+          grid-template-columns: minmax(780px, 1fr) 390px;
+          grid-template-rows: minmax(0, 1fr);
+          align-items: stretch;
+        }
+
+        .sidebar {
+          grid-column: 2 / 3;
+          grid-row: 1 / 2;
+          grid-template-rows: auto auto minmax(290px, 1fr);
+          min-height: 0;
+        }
+
+        .battle-panel {
+          grid-column: 1 / 2;
+          grid-row: 1 / 2;
+          min-height: 0;
+        }
+
+        .topbar {
+          padding: 10px 12px;
+        }
+
+        .brand h1 {
+          font-size: 14px;
+        }
+
+        .brand p {
+          font-size: 11px;
+        }
+
+        .stage-meta strong {
+          font-size: 16px;
+          line-height: 1.35;
+        }
+
+        .stage-picker {
+          grid-template-columns: minmax(0, 1fr) 72px;
+        }
+
+        .dock {
+          min-height: 290px;
+        }
+
+        .arena-wrap {
+          height: 100%;
+          min-height: 620px;
+          aspect-ratio: auto;
+        }
+
+        .dock-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (min-width: 981px) and (max-height: 760px) {
+        .brand p,
+        .stage-meta span {
+          display: none;
+        }
+
+        .topbar,
+        .stagebar,
+        .dock {
+          padding: 8px 10px;
+        }
+
+        .sidebar {
+          grid-template-rows: auto auto minmax(240px, 1fr);
+        }
+
+        .dock {
+          min-height: 240px;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .app {
+          padding: 6px;
+          gap: 6px;
+          grid-template-rows: minmax(260px, 40dvh) minmax(0, 1fr);
+        }
+
+        .brand p,
+        .stage-meta span,
+        .note-box,
+        .badge,
+        .pill {
+          font-size: 11px;
+        }
+
+        .brand p {
+          display: none;
+        }
+
+        .topbar,
+        .stagebar,
+        .battle-panel,
+        .dock {
+          padding: 8px;
+        }
+
+        .stage-picker {
+          grid-template-columns: 1fr;
+        }
+
+        .arena-wrap {
+          aspect-ratio: auto;
+        }
+
+        .hud .stat {
+          padding: 8px;
+          border-radius: 14px;
+        }
+
+        .tower-card {
+          min-height: 68px;
+          padding: 7px;
+        }
+
+        .tower-visual {
+          grid-template-columns: 38px 1fr;
+          gap: 6px;
+        }
+
+        .tower-icon {
+          width: 38px;
+          height: 38px;
+          font-size: 22px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <main class="battle-panel panel">
+        <div class="arena-topline">
+          <div class="arena-mini">
+            <div class="pill" id="eventPill">事件：尚未觸發</div>
+            <div class="pill" id="unlockPill">塔種解鎖：前 3 種</div>
+            <div class="pill" id="pathPill">路徑：初始道路</div>
+            <div class="badge phase-badge" id="phaseBadge">階段：整備中</div>
+          </div>
+          <div class="arena-center">
+            <div class="note-box compact" id="waveBriefBox">
+              <strong>整備中</strong> 第一波倒數開始。拖曳下方部署到地圖，長按卡片可看技能與價格。
+            </div>
+            <div class="hint-badge" id="hoverBadge">滑鼠移入或手機長按可看資訊</div>
+          </div>
+        </div>
+        <div class="arena-wrap">
+          <canvas id="gameCanvas" width="720" height="480"></canvas>
+          <div class="card-rack" id="cardRack"></div>
+        </div>
+      </main>
+
+      <aside class="sidebar">
+        <header class="topbar panel">
+          <div class="brand">
+            <h1>遊戲資訊</h1>
+            <p>桌機優先。拖曳部署、改變路徑、守住社安網堡壘；手機也能用長按查看單位資訊。</p>
+          </div>
+          <div class="top-actions">
+            <button class="ghost" id="introBtn">開場故事</button>
+            <button class="ghost" id="enemyGuideBtn">怪物圖鑑</button>
+            <button class="ghost" id="leaderboardBtn">排行榜</button>
+            <button class="secondary" id="restartBtn">重開本局</button>
+          </div>
+        </header>
+
+        <section class="stagebar panel">
+          <div class="stage-row">
+            <div class="stage-meta">
+              <strong id="stageTitle">第 1 關：初案進場</strong>
+              <span id="stageSubtitle">每關 3 波，過關才能解鎖下一關。通過第 4 關才會解鎖無限模式。</span>
+            </div>
+            <div class="stage-picker">
+              <select id="stageSelect"></select>
+              <button id="loadStageBtn">載入</button>
+            </div>
+          </div>
+          <div class="hud side-hud">
+            <div class="stat panel">
+              <small>堡壘 HP</small>
+              <strong id="fortressHpValue">11</strong>
+            </div>
+            <div class="stat panel">
+              <small>可用積分</small>
+              <strong id="scoreValue">80</strong>
+            </div>
+            <div class="stat panel">
+              <small>波次</small>
+              <strong id="waveValue">1 / 3</strong>
+            </div>
+            <div class="stat panel">
+              <small>已擊破</small>
+              <strong id="killsValue">0</strong>
+            </div>
+            <div class="stat panel">
+              <small>倒數</small>
+              <strong id="countdownValue">10s</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="dock panel">
+          <div class="dock-header">
+            <strong>部署單位</strong>
+            <div class="inline-actions">
+              <button class="ghost" id="clearSelectionBtn">取消拖曳</button>
+            </div>
+          </div>
+          <div class="info-strip" id="buffStrip"></div>
+          <div class="dock-grid" id="dockGrid"></div>
+        </section>
+      </aside>
+    </div>
+
+    <div class="drag-ghost" id="dragGhost" hidden></div>
+
+    <div class="modal" id="introModal">
+      <div class="dialog">
+        <h2>開場故事</h2>
+        <p>
+          你不是站在奇幻王國的城牆，而是站在兒少保護第一線。怪物不是獸人與亡靈，而是兒保案件、
+          一級案件、合併案件、安置案件、狂暴家長、新聞案件與主管關切案件。
+        </p>
+        <p>
+          每一波倒數一結束，壓力就會直接湧進戰場。你要拖曳社工助理、社工、社工督導等部署到底圖，
+          用擠壓路線的方式改變怪物行徑，守住社安網堡壘。一路破關，才能解鎖更高關卡、更多塔種，以及無限模式。
+        </p>
+        <div class="modal-actions">
+          <button id="closeIntroBtn">開始值勤</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="infoModal" hidden>
+      <div class="dialog">
+        <h2 id="infoTitle">部署資訊</h2>
+        <p id="infoBody"></p>
+        <div class="modal-actions">
+          <button class="secondary" id="sellTowerBtn" hidden>賣出塔位</button>
+          <button id="closeInfoBtn">關閉</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="handModal" hidden>
+      <div class="dialog">
+        <h2>支援卡手牌</h2>
+        <p>點開查看效果後，再決定是否現在施展。未使用的卡會保留在手牌中。</p>
+        <div class="reward-grid" id="handGrid"></div>
+        <div class="modal-actions">
+          <button id="closeHandBtn">關閉</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="rewardModal" hidden>
+      <div class="dialog">
+        <h2>本波獎勵卡</h2>
+        <p>守住了。請選一張支援卡帶進下一波，選完後會開始下一段倒數。</p>
+        <div class="reward-grid" id="rewardGrid"></div>
+      </div>
+    </div>
+
+    <div class="modal" id="summaryModal" hidden>
+      <div class="dialog">
+        <h2 id="summaryTitle">本局結算</h2>
+        <p id="summaryBody"></p>
+        <div class="modal-actions">
+          <button id="summaryReplayBtn">重玩</button>
+          <button class="secondary" id="summaryNextBtn">下一關</button>
+          <button class="ghost" id="summaryCloseBtn">關閉</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="leaderboardModal" hidden>
+      <div class="dialog">
+        <h2>全球排行榜</h2>
+        <div class="form-grid">
+          <input id="playerName" maxlength="16" placeholder="玩家名稱" />
+          <input id="playerRegion" maxlength="18" placeholder="地區，例如 Taipei" />
+          <div class="inline-actions">
+            <button id="submitScoreBtn" disabled>送出成績</button>
+            <button class="ghost" id="refreshBoardBtn">重新整理</button>
+          </div>
+        </div>
+        <div class="board-list" id="leaderboard">
+          <div class="board-head">
+            <div>#</div>
+            <div>玩家</div>
+            <div>分數</div>
+            <div>波次</div>
+          </div>
+        </div>
+        <p id="boardNote">未設定遠端端點時會先使用本機排行榜。</p>
+        <div class="modal-actions">
+          <button id="closeLeaderboardBtn">關閉</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="enemyGuideModal" hidden>
+      <div class="dialog">
+        <h2>怪物圖鑑</h2>
+        <p>查看每種案件怪的血量、速度、抗性與特殊行為，方便在開打前決定火力配置。</p>
+        <div class="enemy-guide-grid" id="enemyGuideGrid"></div>
+        <div class="modal-actions">
+          <button id="closeEnemyGuideBtn">關閉</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" hidden></div>
+
+    <script>
+      const LEADERBOARD_CONFIG = {
+        endpoint: /^https?:$/.test(window.location.protocol) ? `${window.location.origin}/api/leaderboard` : "",
+        gameId: "frontline-guardian-v4",
+      };
+
+      const PROGRESS_KEY = "frontline-guardian-progress";
+      const SCORE_KEY = "frontline-guardian-v4-scores";
+      const GRID = { cols: 12, rows: 8, cell: 60 };
+      const WAVE_COUNTS = [7, 10, 13];
+      const EARLY_STAGE_TUNING = {
+        1: { count: [0.72, 0.8, 0.86], hp: 0.8, speed: 0.94, threatOffset: -2, eventChance: 0.35 },
+        2: { count: [0.8, 0.86, 0.92], hp: 0.86, speed: 0.96, threatOffset: -2, eventChance: 0.45 },
+        3: { count: [0.88, 0.92, 0.96], hp: 0.92, speed: 0.98, threatOffset: -1, eventChance: 0.56 },
+        4: { count: [0.84, 0.9, 0.96], hp: 0.88, speed: 0.95, threatOffset: -2, eventChance: 0.42 },
+        5: { count: [0.88, 0.94, 1], hp: 0.92, speed: 0.97, threatOffset: -1, eventChance: 0.5 },
+        6: { count: [0.92, 0.98, 1.04], hp: 0.95, speed: 0.98, threatOffset: -1, eventChance: 0.56 },
+        7: { count: [0.96, 1.02, 1.08], hp: 0.98, speed: 0.99, threatOffset: 0, eventChance: 0.62 },
+        8: { count: [0.98, 1.04, 1.1], hp: 1, speed: 1, threatOffset: 0, eventChance: 0.66 },
+      };
+      const TOKEN_MAX_CODE = "tokenmax";
+      const TOKEN_MAX_VALUE = 999999;
+
+      const RECRUITS = [
+        { key: "assistant", icon: "○", label: "社工助理", cost: 24, damage: 8, range: 72, rate: 0.86, color: "#6da28f", mode: "basic", pattern: "單發補刀", info: "低價單發射擊，適合前期卡位與補刀。" },
+        { key: "socialWorker", icon: "□", label: "社工", cost: 42, damage: 15, range: 84, rate: 0.82, color: "#628da8", mode: "basic", pattern: "穩定單點", info: "基礎主力，持續穩定射擊，火力與射程都比助理完整。" },
+        { key: "supervisor", icon: "△", label: "社工督導", cost: 64, damage: 12, range: 98, rate: 0.92, color: "#7c6aa2", mode: "shotgun", pattern: "三發霰彈", info: "一次噴出三發霰彈，適合放在轉角和怪潮密集處。" },
+        { key: "senior", icon: "◇", label: "高級社工師", cost: 92, damage: 8, range: 112, rate: 0.24, color: "#9b6e93", mode: "machinegun", pattern: "高速機關槍", info: "高速低傷機關槍，能快速掃掉低血量與殘血怪。" },
+        { key: "leader", icon: "⬟", label: "社工組長", cost: 126, damage: 34, range: 122, rate: 1.08, color: "#bc775e", mode: "emp", pattern: "電磁緩速砲", info: "擊中後會在地面炸開電磁場，傷害附近怪並大幅拖慢速度。" },
+        { key: "director", icon: "★", label: "超強主任", cost: 164, damage: 52, range: 176, rate: 1.3, color: "#d07b4a", mode: "sniper", pattern: "遠距狙擊", info: "超遠距高傷狙擊，能順帶貫穿第二隻高壓案件。" },
+        { key: "geniusDirector", icon: "✦", label: "天才局長", cost: 212, damage: 42, range: 150, rate: 0.74, color: "#c95f46", mode: "chain", pattern: "連鎖雷達", info: "主彈命中後會向附近怪物跳電，適合多目標壓制。" },
+        { key: "mayor", icon: "✪", label: "安心市長", cost: 270, damage: 20, range: 168, rate: 1.24, color: "#b94c40", mode: "radar", pattern: "公用串連雷達", info: "發射公用雷達標記前線目標，讓所有塔暫時朝同一方向集中火力。" },
+        { key: "commissioner", icon: "☼", label: "高級政委", cost: 338, damage: 96, range: 186, rate: 1.48, color: "#8b3f3d", mode: "rail", pattern: "穿透軌道砲", info: "打出一條穿透直線，會掃過同一路徑上的多隻重怪。" },
+      ];
+      const RECRUIT_MAP = Object.fromEntries(RECRUITS.map((item) => [item.key, item]));
+      const UTILITY_ITEMS = [
+        {
+          key: "expansion",
+          icon: "▦",
+          label: "地坪拓點",
+          cost: 36,
+          color: "#7f9f7a",
+          pattern: "開墾草皮",
+          info: "把草皮改造成可通行、可放塔的新建地，怪物之後也能改線繞進來。",
+        },
+      ];
+
+      function recruitSummary(recruit) {
+        return `${recruit.pattern}｜火力 ${recruit.damage}｜範圍 ${Math.round(recruit.range / 6)} 格｜攻速 ${recruit.rate.toFixed(2)} 秒`;
+      }
+
+      function utilitySummary(tool) {
+        return `${tool.pattern}｜花費 ${tool.cost}｜新增 1 格可通行建地`;
+      }
+
+      const FUSION_COST_MULTIPLIER = [1, 2, 3, 4];
+      const CREATOR_CODE = "openallroles";
+
+      let audioContextRef = null;
+      let lastAudioAt = 0;
+
+      function playFxTone(kind, intensity = 1) {
+        const now = performance.now();
+        if (now - lastAudioAt < 45) return;
+        lastAudioAt = now;
+        try {
+          audioContextRef = audioContextRef || new (window.AudioContext || window.webkitAudioContext)();
+          if (audioContextRef.state === "suspended") audioContextRef.resume();
+          const osc = audioContextRef.createOscillator();
+          const gain = audioContextRef.createGain();
+          const duration = kind === "merge" ? 0.18 : 0.08;
+          const base = kind === "merge" ? 420 : kind === "shotgun" ? 240 : kind === "sniper" ? 620 : 320;
+          osc.type = kind === "merge" ? "triangle" : kind === "machinegun" ? "square" : "sine";
+          osc.frequency.setValueAtTime(base * intensity, audioContextRef.currentTime);
+          osc.frequency.exponentialRampToValueAtTime((base + 80) * intensity, audioContextRef.currentTime + duration);
+          gain.gain.setValueAtTime(kind === "machinegun" ? 0.018 : 0.028, audioContextRef.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, audioContextRef.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(audioContextRef.destination);
+          osc.start();
+          osc.stop(audioContextRef.currentTime + duration);
+        } catch (error) {
+          // audio is optional
+        }
+      }
+
+      function towerLevel(tower) {
+        return 1 + (tower.star || 0);
+      }
+
+      function effectiveTowerLevel(tower) {
+        return Math.min(5, towerLevel(tower) + (state.tempEffects.starBoostTimer > 0 ? 1 : 0));
+      }
+
+      function towerProfile(recruit, tower) {
+        const level = effectiveTowerLevel(tower);
+        const profile = {
+          level,
+          rangeMul: 1,
+          damageMul: 1,
+          cooldownMul: 1,
+          multishot: 1,
+          pellets: 3,
+          pelletDamageMul: 0.48,
+          chainCount: 3,
+          chainFalloff: 0.72,
+          chainRadius: 108,
+          splashRadius: 78,
+          splashMultiplier: 0.56,
+          slowFactor: 0.55,
+          slowDuration: 2.2,
+          pierceCount: 1,
+          pierceRadius: 72,
+          radarLockDuration: 4.4,
+          shotSpeed: 360,
+          projectileRadius: 4,
+          heavyBonus: 1,
+          fastBonus: 1,
+          applySlowOnHit: false,
+          glow: 0.18 + level * 0.07,
+          label: `第 ${level} 段`,
+        };
+        switch (recruit.mode) {
+          case "basic":
+            if (level >= 2) profile.rangeMul *= 1.2;
+            if (level >= 3) profile.cooldownMul *= 0.78;
+            if (level >= 4) {
+              profile.multishot = 2;
+              profile.damageMul *= 0.82;
+              profile.shotSpeed = 430;
+            }
+            if (level >= 5) {
+              profile.multishot = 3;
+              profile.damageMul *= 0.86;
+              profile.fastBonus = 1.35;
+              profile.projectileRadius = 4.8;
+            }
+            break;
+          case "shotgun":
+            if (level >= 2) profile.cooldownMul *= 0.76;
+            if (level >= 3) profile.heavyBonus = 1.45;
+            if (level >= 4) {
+              profile.pellets = 5;
+              profile.pelletDamageMul = 0.42;
+            }
+            if (level >= 5) {
+              profile.applySlowOnHit = true;
+              profile.slowFactor = 0.72;
+              profile.slowDuration = 1.2;
+            }
+            break;
+          case "machinegun":
+            if (level >= 2) profile.cooldownMul *= 0.72;
+            if (level >= 3) profile.rangeMul *= 1.12;
+            if (level >= 4) {
+              profile.multishot = 2;
+              profile.damageMul *= 0.74;
+            }
+            if (level >= 5) {
+              profile.applySlowOnHit = true;
+              profile.slowFactor = 0.82;
+              profile.slowDuration = 0.7;
+              profile.shotSpeed = 620;
+            }
+            break;
+          case "emp":
+            if (level >= 2) profile.splashRadius = 98;
+            if (level >= 3) {
+              profile.slowFactor = 0.48;
+              profile.slowDuration = 2.8;
+            }
+            if (level >= 4) {
+              profile.chainCount = 2;
+              profile.chainRadius = 86;
+            }
+            if (level >= 5) {
+              profile.splashMultiplier = 0.72;
+              profile.damageMul *= 1.16;
+            }
+            break;
+          case "sniper":
+            if (level >= 2) profile.rangeMul *= 1.18;
+            if (level >= 3) profile.cooldownMul *= 0.82;
+            if (level >= 4) {
+              profile.pierceCount = 2;
+              profile.pierceRadius = 110;
+            }
+            if (level >= 5) {
+              profile.heavyBonus = 1.55;
+              profile.projectileRadius = 4.5;
+            }
+            break;
+          case "chain":
+            if (level >= 2) profile.chainCount = 4;
+            if (level >= 3) profile.cooldownMul *= 0.8;
+            if (level >= 4) {
+              profile.chainFalloff = 0.82;
+              profile.chainRadius = 122;
+            }
+            if (level >= 5) {
+              profile.chainCount = 6;
+              profile.applySlowOnHit = true;
+              profile.slowFactor = 0.8;
+              profile.slowDuration = 1.1;
+            }
+            break;
+          case "radar":
+            if (level >= 2) profile.radarLockDuration = 6.2;
+            if (level >= 3) profile.cooldownMul *= 0.84;
+            if (level >= 4) {
+              profile.damageMul *= 1.22;
+              profile.rangeMul *= 1.1;
+            }
+            if (level >= 5) {
+              profile.multishot = 2;
+              profile.fastBonus = 1.18;
+            }
+            break;
+          case "rail":
+            if (level >= 2) profile.damageMul *= 1.15;
+            if (level >= 3) profile.cooldownMul *= 0.84;
+            if (level >= 4) {
+              profile.pierceCount = 4;
+              profile.pierceRadius = 135;
+            }
+            if (level >= 5) {
+              profile.applySlowOnHit = true;
+              profile.slowFactor = 0.76;
+              profile.slowDuration = 1.4;
+            }
+            break;
+          default:
+            break;
+        }
+        return profile;
+      }
+
+      function towerUpgradeSummary(recruit, tower) {
+        const level = towerLevel(tower);
+        const notes = [];
+        if (recruit.mode === "basic") {
+          if (level >= 2) notes.push("擴大射程");
+          if (level >= 3) notes.push("提升射速");
+          if (level >= 4) notes.push("雙發齊射");
+          if (level >= 5) notes.push("三發連射，專打快怪");
+        } else if (recruit.mode === "shotgun") {
+          if (level >= 2) notes.push("裝填加快");
+          if (level >= 3) notes.push("對高壓怪加傷");
+          if (level >= 4) notes.push("彈丸增加到 5 發");
+          if (level >= 5) notes.push("附帶緩速效果");
+        } else if (recruit.mode === "machinegun") {
+          if (level >= 2) notes.push("射速大增");
+          if (level >= 3) notes.push("延伸射程");
+          if (level >= 4) notes.push("雙線掃射");
+          if (level >= 5) notes.push("壓制減速");
+        } else if (recruit.mode === "emp") {
+          if (level >= 2) notes.push("電磁場範圍擴大");
+          if (level >= 3) notes.push("緩速更強");
+          if (level >= 4) notes.push("附帶次級跳電");
+          if (level >= 5) notes.push("爆炸傷害提升");
+        } else if (recruit.mode === "sniper") {
+          if (level >= 2) notes.push("超遠射程");
+          if (level >= 3) notes.push("拉快瞄準");
+          if (level >= 4) notes.push("額外貫穿");
+          if (level >= 5) notes.push("重裝處決");
+        } else if (recruit.mode === "chain") {
+          if (level >= 2) notes.push("增加跳電次數");
+          if (level >= 3) notes.push("加快頻率");
+          if (level >= 4) notes.push("降低連鎖衰減");
+          if (level >= 5) notes.push("跳電附帶減速");
+        } else if (recruit.mode === "radar") {
+          if (level >= 2) notes.push("延長鎖定");
+          if (level >= 3) notes.push("提高發射頻率");
+          if (level >= 4) notes.push("強化雷達傷害");
+          if (level >= 5) notes.push("雙重標定");
+        } else if (recruit.mode === "rail") {
+          if (level >= 2) notes.push("主砲增傷");
+          if (level >= 3) notes.push("縮短冷卻");
+          if (level >= 4) notes.push("穿透更多目標");
+          if (level >= 5) notes.push("附帶制動效果");
+        }
+        return notes.length ? `目前強化：${notes.join("、")}` : "目前強化：基礎形態";
+      }
+
+      function recruitIndex(recruitKey) {
+        return RECRUITS.findIndex((item) => item.key === recruitKey);
+      }
+
+      function towerHasCommandProtection(tower) {
+        return recruitIndex(tower.recruitKey) >= 2;
+      }
+
+      function fusionCostForTower(tower) {
+        const recruit = RECRUIT_MAP[tower.recruitKey];
+        const level = towerLevel(tower);
+        const multiplier = FUSION_COST_MULTIPLIER[Math.max(0, Math.min(FUSION_COST_MULTIPLIER.length - 1, level - 1))];
+        return Math.round(recruit.cost * multiplier);
+      }
+
+      function baseTowerMaxHp(recruitKey) {
+        const recruit = RECRUIT_MAP[recruitKey];
+        const index = recruitIndex(recruitKey);
+        return Math.round(62 + index * 22 + recruit.cost * 0.32);
+      }
+
+      function towerMaxHp(towerOrRecruitKey, star = 0) {
+        if (typeof towerOrRecruitKey === "string") {
+          return Math.round(baseTowerMaxHp(towerOrRecruitKey) * (1 + star * 0.28));
+        }
+        return Math.round(baseTowerMaxHp(towerOrRecruitKey.recruitKey) * (1 + (towerOrRecruitKey.star || 0) * 0.28));
+      }
+
+      function syncTowerDurability(tower, options = {}) {
+        const prevMax = tower.maxHp || towerMaxHp(tower.recruitKey, tower.star || 0);
+        const prevHp = tower.hp ?? prevMax;
+        const nextMax = towerMaxHp(tower);
+        const preserveRatio = options.preserveRatio !== false;
+        const healRatio = options.healRatio || 0;
+        const baseHp = options.fullHeal ? nextMax : preserveRatio ? nextMax * (prevMax > 0 ? prevHp / prevMax : 1) : prevHp;
+        tower.maxHp = nextMax;
+        tower.hp = options.fullHeal ? nextMax : Math.max(1, Math.min(nextMax, baseHp + nextMax * healRatio));
+        if (towerHasCommandProtection(tower)) tower.disabled = 0;
+      }
+
+      function triggerTowerUpgradeFx(tower, color, strength = towerLevel(tower)) {
+        const center = cellCenter(tower.col, tower.row);
+        tower.upgradeFx = 0.72 + strength * 0.06;
+        emitMuzzleFlash(center.x, center.y, color, 18 + strength * 5);
+        emitParticles(center.x, center.y, "#fff4c7", 14 + strength * 3);
+        state.projectiles.push({
+          type: "flash",
+          color,
+          ttl: 0.16,
+          radius: 22 + strength * 6,
+          x: center.x,
+          y: center.y,
+        });
+        state.projectiles.push({
+          type: "flash",
+          color: "#fff7ef",
+          ttl: 0.22,
+          radius: 10 + strength * 3,
+          x: center.x,
+          y: center.y,
+        });
+        playFxTone("merge", 1.04 + strength * 0.11);
+      }
+
+      const ENEMIES = {
+        child: { label: "兒保案件", hp: 38, speed: 52, reward: 8, damage: 1, size: 10, color: "#73a290", threat: 1, feature: "標準案件，節奏穩定" },
+        urgent: { label: "一級案件", hp: 66, speed: 54, reward: 11, damage: 1, size: 12, color: "#77a2c5", threat: 2, feature: "速度偏快，壓縮反應時間" },
+        sprint: { label: "突發通報", hp: 48, speed: 76, reward: 12, damage: 1, size: 9, color: "#5eaebe", threat: 2, feature: "高速低血，專門偷跑" },
+        merged: { label: "合併案件", hp: 106, speed: 47, reward: 14, damage: 2, size: 14, color: "#9189c1", threat: 3, feature: "中低壓力，常和快怪混編" },
+        placement: { label: "安置案件", hp: 166, speed: 41, reward: 18, damage: 2, size: 16, color: "#c69758", threat: 4, feature: "血量較高，擅長慢壓前線" },
+        backlog: { label: "久案沉積", hp: 320, speed: 28, reward: 24, damage: 3, size: 22, color: "#90765d", threat: 5, feature: "超厚血但移動很慢，會吃掉持久火力" },
+        parent: {
+          label: "狂暴家長",
+          hp: 230,
+          speed: 45,
+          reward: 22,
+          damage: 3,
+          size: 18,
+          color: "#cf6350",
+          threat: 5,
+          resist: { assistant: 0.56, socialWorker: 0.68 },
+          canDisable: true,
+          feature: "對低階塔有抗性，高壓時會壓制助理與社工",
+        },
+        striker: {
+          label: "攻擊性家屬",
+          hp: 248,
+          speed: 49,
+          reward: 26,
+          damage: 3,
+          size: 17,
+          color: "#b55150",
+          threat: 5,
+          canDisable: true,
+          alwaysCounterAttack: true,
+          towerDamage: 10,
+          towerAttackRange: 108,
+          disableCooldown: 2.3,
+          feature: "會主動攻擊塔位，持續磨損部署耐久",
+        },
+        media: {
+          label: "新聞案件",
+          hp: 286,
+          speed: 43,
+          reward: 28,
+          damage: 4,
+          size: 20,
+          color: "#d08a3d",
+          threat: 6,
+          resist: { supervisor: 0.76 },
+          canDisable: true,
+          alwaysTowerAttack: true,
+          towerDamage: 16,
+          towerAttackRange: 130,
+          feature: "會以輿論砲火壓塔，對督導火力也有抗性",
+        },
+        concern: {
+          label: "主管關切案件",
+          hp: 352,
+          speed: 39,
+          reward: 34,
+          damage: 5,
+          size: 21,
+          color: "#a24f79",
+          threat: 7,
+          resist: { leader: 0.82, director: 0.82 },
+          canDisable: true,
+          alwaysTowerAttack: true,
+          towerDamage: 24,
+          towerAttackRange: 148,
+          disableCooldown: 2.1,
+          feature: "高壓重裝，會以砲火優先削弱前線塔位",
+        },
+      };
+
+      const EVENT_POOL = [
+        {
+          id: "surge",
+          label: "案量海嘯",
+          desc: "怪物數量增加 35%，但每隻怪的積分回饋 +2。",
+          apply(plan) {
+            plan.countMultiplier *= 1.35;
+            plan.rewardBonus += 2;
+          },
+        },
+        {
+          id: "break",
+          label: "跨網斷裂",
+          desc: "怪物速度提高 14%，同時降低緩速效果。",
+          apply(plan) {
+            plan.speedMultiplier *= 1.14;
+            plan.slowResistance += 0.12;
+          },
+        },
+        {
+          id: "shortage",
+          label: "資源匱乏",
+          desc: "所有塔的攻速下降 16%。",
+          apply(plan) {
+            plan.towerCooldownMultiplier *= 1.16;
+          },
+        },
+        {
+          id: "litigation",
+          label: "因公涉訟",
+          desc: "高威脅怪物會反打附近塔，低階塔可能暫時失效。",
+          apply(plan) {
+            plan.enemyCounterAttack = true;
+          },
+        },
+        {
+          id: "attack",
+          label: "家長攻擊",
+          desc: "高威脅怪物會反打塔，低階塔可能失效，抵達堡壘時額外造成 1 點傷害。",
+          apply(plan) {
+            plan.enemyCounterAttack = true;
+            plan.fortressDamageBonus += 1;
+          },
+        },
+      ];
+
+      const REWARD_CARDS = [
+        {
+          id: "trauma",
+          icon: "☯",
+          label: "創傷知情",
+          desc: "14 秒內所有塔射程 +18%，攻擊附帶緩速。",
+          apply(state) {
+            state.tempEffects.traumaTimer = Math.max(state.tempEffects.traumaTimer, 14);
+          },
+        },
+        {
+          id: "cross",
+          icon: "✥",
+          label: "跨網協作",
+          desc: "立即啟動 12 秒集中火力，全塔鎖定最前方怪物且傷害 +22%。",
+          apply(state) {
+            state.tempEffects.focusTimer = Math.max(state.tempEffects.focusTimer, 12);
+          },
+        },
+        {
+          id: "telepathy",
+          icon: "◌",
+          label: "通靈技能",
+          desc: "16 秒內所有怪物移動速度 -12%。",
+          apply(state) {
+            state.tempEffects.telepathyTimer = Math.max(state.tempEffects.telepathyTimer, 16);
+          },
+        },
+        {
+          id: "crit",
+          icon: "⚖",
+          label: "法律暴擊",
+          desc: "14 秒內全塔獲得 18% 暴擊率，暴擊傷害 1.9 倍。",
+          apply(state) {
+            state.tempEffects.critTimer = Math.max(state.tempEffects.critTimer, 14);
+          },
+        },
+        {
+          id: "boost",
+          icon: "⬆",
+          label: "長官支援",
+          desc: "15 秒內所有已部署塔視同額外 +1 段，上限照常。",
+          apply(state) {
+            state.tempEffects.starBoostTimer = Math.max(state.tempEffects.starBoostTimer, 15);
+          },
+        },
+        {
+          id: "restore",
+          icon: "✚",
+          label: "回穩修復",
+          desc: "14 秒內全塔每次命中都會同步為堡壘回復少量生命。",
+          apply(state) {
+            state.tempEffects.healPulseTimer = Math.max(state.tempEffects.healPulseTimer, 14);
+          },
+        },
+      ];
+
+      const STAGE_BLUEPRINTS = [
+        { name: "初案進場", desc: "堡壘很脆，第二波開始就可能撐不住。", waypoints: [[0, 3], [3, 3], [3, 5], [8, 5], [8, 2], [11, 2]] },
+        { name: "深夜補件", desc: "地形開始折返，需要提早拉長有效路徑。", waypoints: [[0, 5], [2, 5], [2, 1], [6, 1], [6, 4], [11, 4]] },
+        { name: "校安通報", desc: "前段很短，放塔位置錯了很容易漏怪。", waypoints: [[0, 2], [1, 2], [1, 6], [7, 6], [7, 3], [11, 3]] },
+        { name: "多頭交辦", desc: "第四關後會解鎖無限模式與新的三種塔。", waypoints: [[0, 1], [4, 1], [4, 4], [2, 4], [2, 7], [10, 7], [10, 3], [11, 3]] },
+        { name: "急案轉介", desc: "中段長走廊是主要擠壓區。", waypoints: [[0, 6], [3, 6], [3, 2], [8, 2], [8, 5], [11, 5]] },
+        { name: "跨區協調", desc: "上下層折返，需要分散部署。", waypoints: [[0, 4], [3, 4], [3, 0], [9, 0], [9, 6], [11, 6]] },
+        { name: "臨時安置", desc: "怪物血量開始提升，遠距火力很重要。", waypoints: [[0, 2], [5, 2], [5, 6], [8, 6], [8, 1], [11, 1]] },
+        { name: "媒體盯場", desc: "過了這關會再解鎖後三種塔。", waypoints: [[0, 5], [4, 5], [4, 2], [7, 2], [7, 7], [11, 7]] },
+        { name: "夜半出勤", desc: "直角轉折很多，擠壓後路線會變得很長。", waypoints: [[0, 1], [2, 1], [2, 4], [5, 4], [5, 1], [9, 1], [9, 5], [11, 5]] },
+        { name: "網絡斷點", desc: "跨網斷裂事件出現時會很難守。", waypoints: [[0, 6], [4, 6], [4, 3], [8, 3], [8, 0], [11, 0]] },
+        { name: "資源緊縮", desc: "地形很寬，射程會變得更有價值。", waypoints: [[0, 3], [3, 3], [3, 7], [7, 7], [7, 2], [11, 2]] },
+        { name: "主管追問", desc: "終點前壓力集中，堡壘很吃最後一段控場。", waypoints: [[0, 0], [5, 0], [5, 5], [9, 5], [9, 2], [11, 2]] },
+        { name: "涉訟風暴", desc: "高威脅怪會更頻繁出現。", waypoints: [[0, 5], [2, 5], [2, 2], [6, 2], [6, 6], [10, 6], [10, 3], [11, 3]] },
+        { name: "制度寒蟬", desc: "你需要主動把怪物擠進迂迴路線。", waypoints: [[0, 2], [3, 2], [3, 6], [8, 6], [8, 1], [11, 1]] },
+        { name: "最終聽證", desc: "最後一關，堡壘雖較厚，但怪潮最兇。", waypoints: [[0, 1], [5, 1], [5, 5], [2, 5], [2, 7], [9, 7], [9, 3], [11, 3]] },
+      ];
+
+      function expandWaypoints(waypoints) {
+        const cells = [];
+        for (let i = 0; i < waypoints.length - 1; i += 1) {
+          let [x, y] = waypoints[i];
+          const [tx, ty] = waypoints[i + 1];
+          const dx = Math.sign(tx - x);
+          const dy = Math.sign(ty - y);
+          if (!cells.length) cells.push({ col: x, row: y });
+          while (x !== tx || y !== ty) {
+            x += dx;
+            y += dy;
+            cells.push({ col: x, row: y });
+          }
+        }
+        return cells;
+      }
+
+      function buildStage(id, blueprint) {
+        const routeCells = expandWaypoints(blueprint.waypoints);
+        const routeSet = new Set(routeCells.map((cell) => `${cell.col},${cell.row}`));
+        const walkableSet = new Map();
+        routeCells.forEach((cell) => {
+          walkableSet.set(`${cell.col},${cell.row}`, cell);
+        });
+        routeCells.forEach((cell) => {
+          [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1],
+          ].forEach(([dc, dr]) => {
+            const col = cell.col + dc;
+            const row = cell.row + dr;
+            if (col < 0 || col >= GRID.cols || row < 0 || row >= GRID.rows) return;
+            walkableSet.set(`${col},${row}`, { col, row });
+          });
+        });
+        const walkableCells = [...walkableSet.values()];
+        const obstacleCells = [];
+        for (let row = 0; row < GRID.rows; row += 1) {
+          for (let col = 0; col < GRID.cols; col += 1) {
+            const key = `${col},${row}`;
+            if (!walkableSet.has(key)) obstacleCells.push({ col, row });
+          }
+        }
+        return {
+          id,
+          name: blueprint.name,
+          desc: blueprint.desc,
+          routeCells,
+          routeSet,
+          walkableCells,
+          walkableSet,
+          obstacleCells,
+          start: routeCells[0],
+          goal: routeCells[routeCells.length - 1],
+        };
+      }
+
+      const STAGES = STAGE_BLUEPRINTS.map((blueprint, index) => buildStage(index + 1, blueprint));
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+
+      const ui = {
+        stageTitle: document.getElementById("stageTitle"),
+        stageSubtitle: document.getElementById("stageSubtitle"),
+        stageSelect: document.getElementById("stageSelect"),
+        waveBriefBox: document.getElementById("waveBriefBox"),
+        eventPill: document.getElementById("eventPill"),
+        unlockPill: document.getElementById("unlockPill"),
+        pathPill: document.getElementById("pathPill"),
+        hoverBadge: document.getElementById("hoverBadge"),
+        phaseBadge: document.getElementById("phaseBadge"),
+        fortressHpValue: document.getElementById("fortressHpValue"),
+        scoreValue: document.getElementById("scoreValue"),
+        waveValue: document.getElementById("waveValue"),
+        killsValue: document.getElementById("killsValue"),
+        countdownValue: document.getElementById("countdownValue"),
+        dockGrid: document.getElementById("dockGrid"),
+        buffStrip: document.getElementById("buffStrip"),
+        cardRack: document.getElementById("cardRack"),
+        dragGhost: document.getElementById("dragGhost"),
+        introModal: document.getElementById("introModal"),
+        infoModal: document.getElementById("infoModal"),
+        infoTitle: document.getElementById("infoTitle"),
+        infoBody: document.getElementById("infoBody"),
+        sellTowerBtn: document.getElementById("sellTowerBtn"),
+        handModal: document.getElementById("handModal"),
+        handGrid: document.getElementById("handGrid"),
+        rewardModal: document.getElementById("rewardModal"),
+        rewardGrid: document.getElementById("rewardGrid"),
+        summaryModal: document.getElementById("summaryModal"),
+        summaryTitle: document.getElementById("summaryTitle"),
+        summaryBody: document.getElementById("summaryBody"),
+        leaderboardModal: document.getElementById("leaderboardModal"),
+        enemyGuideModal: document.getElementById("enemyGuideModal"),
+        enemyGuideGrid: document.getElementById("enemyGuideGrid"),
+        playerName: document.getElementById("playerName"),
+        playerRegion: document.getElementById("playerRegion"),
+        submitScoreBtn: document.getElementById("submitScoreBtn"),
+        refreshBoardBtn: document.getElementById("refreshBoardBtn"),
+        leaderboard: document.getElementById("leaderboard"),
+        boardNote: document.getElementById("boardNote"),
+        toast: document.getElementById("toast"),
+      };
+
+      const state = {
+        progress: readProgress(),
+        mode: "stage",
+        stageIndex: 0,
+        stage: STAGES[0],
+        stageWave: 1,
+        endlessWave: 1,
+        fortressHpMax: 11,
+        fortressHp: 11,
+        score: 80,
+        totalScore: 0,
+        kills: 0,
+        phase: "prep",
+        countdown: 10,
+        waveStartHp: 11,
+        event: null,
+        wavePlan: null,
+        towers: [],
+        enemies: [],
+        projectiles: [],
+        particles: [],
+        bonuses: {
+          critMultiplier: 1.9,
+        },
+        tempEffects: {
+          focusTimer: 0,
+          radarLockTimer: 0,
+          radarLockEnemyId: null,
+          traumaTimer: 0,
+          telepathyTimer: 0,
+          critTimer: 0,
+          starBoostTimer: 0,
+          healPulseTimer: 0,
+          towerCooldownMultiplier: 1,
+          slowResistance: 0,
+          enemyCounterAttack: false,
+          fortressDamageBonus: 0,
+        },
+        spawnQueue: [],
+        currentPath: [],
+        pathVersion: 0,
+        previewPath: [],
+        previewMoveValid: false,
+        extraBuildCells: [],
+        hoverCell: null,
+        hoverTowerId: null,
+        hoverEnemyId: null,
+        hoverSellTowerId: null,
+        drag: null,
+        activePointerId: null,
+        infoTowerId: null,
+        cardHand: [],
+        nextCardId: 1,
+        nextTowerId: 1,
+        nextEnemyId: 1,
+        runEnded: false,
+        rewardPending: false,
+        rewardOptions: [],
+        lastFrame: performance.now(),
+        levelSubmitted: false,
+      };
+
+      function init() {
+        if (new URLSearchParams(window.location.search).get("creator") === "1") {
+          state.progress.creatorUnlocked = true;
+          saveProgress();
+        }
+        ui.introModal.hidden = false;
+        updateStageSelect();
+        bindEvents();
+        loadSelectedStage("stage-1");
+        refreshLeaderboard();
+        requestAnimationFrame(loop);
+      }
+
+      function readProgress() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(PROGRESS_KEY) || "{}");
+          return {
+            clearedStages: parsed.clearedStages || 0,
+            unlockedStage: parsed.unlockedStage || 1,
+            creatorUnlocked: !!parsed.creatorUnlocked,
+          };
+        } catch (error) {
+          return { clearedStages: 0, unlockedStage: 1, creatorUnlocked: false };
+        }
+      }
+
+      function saveProgress() {
+        localStorage.setItem(PROGRESS_KEY, JSON.stringify(state.progress));
+      }
+
+      function towerUnlockCount() {
+        if (state.progress.creatorUnlocked) return 9;
+        return Math.min(9, 3 + Math.floor(state.progress.clearedStages / 4) * 3);
+      }
+
+      function unlockAllRoles(forceToast = true) {
+        if (state.progress.creatorUnlocked) {
+          if (forceToast) toast("製作者後門已開啟，全部塔種可用。");
+          return;
+        }
+        state.progress.creatorUnlocked = true;
+        saveProgress();
+        updateStageSelect();
+        renderDock();
+        refreshUi();
+        if (forceToast) toast("製作者後門啟動，全部塔種已解鎖。");
+      }
+
+      function grantMaxTokens(forceToast = true) {
+        state.score = TOKEN_MAX_VALUE;
+        refreshUi();
+        if (forceToast) toast(`測試代幣已補滿到 ${TOKEN_MAX_VALUE}。`);
+      }
+
+      function updateStageSelect() {
+        ui.stageSelect.innerHTML = "";
+        STAGES.forEach((stage) => {
+          const option = document.createElement("option");
+          option.value = `stage-${stage.id}`;
+          option.textContent = `第 ${stage.id} 關：${stage.name}${stage.id > state.progress.unlockedStage ? "（未解鎖）" : ""}`;
+          option.disabled = stage.id > state.progress.unlockedStage;
+          ui.stageSelect.appendChild(option);
+        });
+        const endless = document.createElement("option");
+        endless.value = "endless";
+        endless.textContent = state.progress.clearedStages >= 4 ? "無限模式" : "無限模式（第 4 關後解鎖）";
+        endless.disabled = state.progress.clearedStages < 4;
+        ui.stageSelect.appendChild(endless);
+      }
+
+      function bindEvents() {
+        document.getElementById("introBtn").addEventListener("click", () => { ui.introModal.hidden = false; });
+        document.getElementById("closeIntroBtn").addEventListener("click", () => { ui.introModal.hidden = true; });
+        document.getElementById("enemyGuideBtn").addEventListener("click", () => {
+          renderEnemyGuide();
+          ui.enemyGuideModal.hidden = false;
+        });
+        document.getElementById("closeEnemyGuideBtn").addEventListener("click", () => { ui.enemyGuideModal.hidden = true; });
+        document.getElementById("leaderboardBtn").addEventListener("click", () => { ui.leaderboardModal.hidden = false; });
+        document.getElementById("closeLeaderboardBtn").addEventListener("click", () => { ui.leaderboardModal.hidden = true; });
+        document.getElementById("closeInfoBtn").addEventListener("click", closeInfoModal);
+        document.getElementById("closeHandBtn").addEventListener("click", () => { ui.handModal.hidden = true; });
+        ui.sellTowerBtn.addEventListener("click", sellInfoTower);
+        document.getElementById("loadStageBtn").addEventListener("click", () => { loadSelectedStage(ui.stageSelect.value); });
+        document.getElementById("restartBtn").addEventListener("click", () => { loadSelectedStage(ui.stageSelect.value); });
+        document.getElementById("clearSelectionBtn").addEventListener("click", clearDragState);
+        document.getElementById("summaryReplayBtn").addEventListener("click", () => {
+          ui.summaryModal.hidden = true;
+          loadSelectedStage(ui.stageSelect.value);
+        });
+        document.getElementById("summaryNextBtn").addEventListener("click", () => {
+          ui.summaryModal.hidden = true;
+          if (state.mode === "stage" && state.stageIndex < STAGES.length - 1) {
+            loadSelectedStage(`stage-${state.stageIndex + 2}`);
+          }
+        });
+        document.getElementById("summaryCloseBtn").addEventListener("click", () => { ui.summaryModal.hidden = true; });
+        ui.submitScoreBtn.addEventListener("click", submitScore);
+        ui.refreshBoardBtn.addEventListener("click", refreshLeaderboard);
+        canvas.addEventListener("pointerdown", onCanvasPointerDown);
+        canvas.addEventListener("contextmenu", (event) => event.preventDefault());
+        window.addEventListener("pointermove", onPointerMove);
+        window.addEventListener("pointerup", onPointerUp);
+        window.addEventListener("pointercancel", onPointerUp);
+        canvas.addEventListener("pointermove", onCanvasHover);
+        canvas.addEventListener("pointerleave", () => {
+          state.hoverCell = null;
+          state.hoverTowerId = null;
+          state.hoverEnemyId = null;
+        });
+        ui.playerName.addEventListener("keydown", (event) => {
+          if (event.key !== "Enter") return;
+          const input = (ui.playerName.value || "").trim().toLowerCase();
+          if (input !== CREATOR_CODE && input !== TOKEN_MAX_CODE) return;
+          event.preventDefault();
+          if (input === CREATOR_CODE) unlockAllRoles();
+          if (input === TOKEN_MAX_CODE) grantMaxTokens();
+          ui.playerName.value = "";
+        });
+      }
+
+      function loadSelectedStage(value) {
+        ui.stageSelect.value = value;
+        if (value === "endless") {
+          state.mode = "endless";
+          state.stageIndex = Math.floor(Math.random() * STAGES.length);
+        } else {
+          const id = Number(value.split("-")[1]);
+          state.mode = "stage";
+          state.stageIndex = Math.max(0, id - 1);
+        }
+        resetRun();
+      }
+
+      function resetRun() {
+        state.stage = STAGES[state.stageIndex];
+        state.stageWave = 1;
+        state.endlessWave = 1;
+        state.fortressHpMax = fortressHpForStage(state.mode === "stage" ? state.stage.id : 6);
+        state.fortressHp = state.fortressHpMax;
+        state.score = startingScoreForStage(state.mode === "stage" ? state.stage.id : 6, state.mode);
+        state.totalScore = 0;
+        state.kills = 0;
+        state.phase = "prep";
+        state.countdown = 10;
+        state.waveStartHp = state.fortressHp;
+        state.event = null;
+        state.wavePlan = null;
+        state.towers = [];
+        state.enemies = [];
+        state.projectiles = [];
+        state.particles = [];
+        state.spawnQueue = [];
+        state.bonuses = {
+          critMultiplier: 1.9,
+        };
+        state.tempEffects = {
+          focusTimer: 0,
+          radarLockTimer: 0,
+          radarLockEnemyId: null,
+          traumaTimer: 0,
+          telepathyTimer: 0,
+          critTimer: 0,
+          starBoostTimer: 0,
+          healPulseTimer: 0,
+          towerCooldownMultiplier: 1,
+          slowResistance: 0,
+          enemyCounterAttack: false,
+          fortressDamageBonus: 0,
+        };
+        state.currentPath = [];
+        state.pathVersion = 0;
+        state.previewPath = [];
+        state.previewMoveValid = false;
+        state.extraBuildCells = [];
+        state.hoverCell = null;
+        state.hoverTowerId = null;
+        state.hoverEnemyId = null;
+        state.hoverSellTowerId = null;
+        state.drag = null;
+        state.activePointerId = null;
+        state.infoTowerId = null;
+        state.cardHand = [];
+        state.nextCardId = 1;
+        state.nextTowerId = 1;
+        state.nextEnemyId = 1;
+        state.runEnded = false;
+        state.rewardPending = false;
+        state.rewardOptions = [];
+        state.levelSubmitted = false;
+        ui.rewardModal.hidden = true;
+        updateStageText();
+        prepareWave();
+        renderDock();
+        renderCardRack();
+        refreshUi();
+      }
+
+      function fortressHpForStage(stageId) {
+        if (stageId === 1) return 12;
+        if (stageId === 2) return 14;
+        return 9 + stageId * 2;
+      }
+
+      function startingScoreForStage(stageId, mode) {
+        if (mode === "endless") return 150;
+        return 80 + Math.max(0, stageId - 1) * 10;
+      }
+
+      function stageDifficultyTuning(stageId, wave, mode) {
+        if (mode !== "stage") {
+          return {
+            countMultiplier: 1,
+            hpMultiplier: 1,
+            speedMultiplier: 1,
+            threatOffset: 0,
+            eventChance: 0.72,
+          };
+        }
+        const profile = EARLY_STAGE_TUNING[stageId];
+        if (!profile) {
+          return {
+            countMultiplier: 1,
+            hpMultiplier: 1,
+            speedMultiplier: 1,
+            threatOffset: 0,
+            eventChance: 0.72,
+          };
+        }
+        return {
+          countMultiplier: profile.count[Math.min(profile.count.length - 1, wave - 1)],
+          hpMultiplier: profile.hp,
+          speedMultiplier: profile.speed,
+          threatOffset: profile.threatOffset,
+          eventChance: profile.eventChance,
+        };
+      }
+
+      function updateStageText() {
+        const title = state.mode === "stage" ? `第 ${state.stage.id} 關：${state.stage.name}` : `無限模式：${state.stage.name}`;
+        ui.stageTitle.textContent = title;
+        ui.stageSubtitle.textContent = state.mode === "stage"
+          ? `${state.stage.desc} 通過第 ${state.stage.id} 關後才能繼續解鎖。`
+          : "每波會持續加壓，地圖會在這張底圖上反覆改線。";
+      }
+
+      function prepareWave() {
+        const wave = state.mode === "stage" ? state.stageWave : state.endlessWave;
+        state.wavePlan = buildWavePlan(state.stage.id, wave, state.mode);
+        state.waveStartHp = state.fortressHp;
+        state.event = state.wavePlan.event;
+        state.spawnQueue = [];
+        state.tempEffects.towerCooldownMultiplier = state.wavePlan.towerCooldownMultiplier;
+        state.tempEffects.slowResistance = state.wavePlan.slowResistance;
+        state.tempEffects.enemyCounterAttack = state.wavePlan.enemyCounterAttack;
+        state.tempEffects.fortressDamageBonus = state.wavePlan.fortressDamageBonus;
+        updateCurrentPath();
+        ui.waveBriefBox.innerHTML = `<strong>${state.phase === "prep" ? "整備倒數" : "戰鬥進行中"}</strong> ${state.wavePlan.brief}`;
+        ui.eventPill.textContent = `事件：${state.event ? state.event.label : "尚未觸發"}`;
+        renderCardRack();
+      }
+
+      function buildWavePlan(stageId, wave, mode) {
+        const tuning = stageDifficultyTuning(stageId, wave, mode);
+        const threat = mode === "stage" ? stageId * 2 + wave : 8 + wave;
+        const adjustedThreat = Math.max(1, threat + tuning.threatOffset);
+        const firstStageWave = mode === "stage" && wave === 1;
+        const event = !firstStageWave && Math.random() < (mode === "stage" ? tuning.eventChance : 0.85)
+          ? EVENT_POOL[Math.floor(Math.random() * EVENT_POOL.length)]
+          : null;
+
+        const plan = {
+          event,
+          countMultiplier: 1,
+          speedMultiplier: 1,
+          hpMultiplier: tuning.hpMultiplier,
+          enemySpeedMultiplier: tuning.speedMultiplier,
+          rewardBonus: 0,
+          clearBonusBoost: 0,
+          slowResistance: 0,
+          towerCooldownMultiplier: 1,
+          enemyCounterAttack: false,
+          fortressDamageBonus: 0,
+        };
+        if (event) event.apply(plan);
+        if (firstStageWave) {
+          const economyBoost = stageId >= 8 ? 1.2 : stageId >= 5 ? 1.12 : 1.05;
+          plan.countMultiplier *= 0.72;
+          plan.hpMultiplier *= 0.76;
+          plan.enemySpeedMultiplier *= 0.9;
+          plan.rewardBonus += 4 + Math.floor(stageId / 4);
+          plan.clearBonusBoost += 10 + Math.floor(stageId / 3) * 2;
+          plan.speedMultiplier *= 1 / economyBoost;
+        }
+        if (mode === "endless") {
+          plan.countMultiplier *= 1 + Math.min(1.25, wave * 0.05);
+          plan.hpMultiplier *= 1 + wave * 0.045;
+          plan.enemySpeedMultiplier *= 1 + Math.min(0.36, wave * 0.012);
+          plan.rewardBonus += Math.floor(wave / 2);
+          plan.clearBonusBoost += Math.floor(wave * 1.6);
+        }
+
+        const pool = ["child"];
+        if (adjustedThreat >= 3) pool.push("urgent");
+        if (adjustedThreat >= 4) pool.push("sprint");
+        if (adjustedThreat >= 5) pool.push("merged");
+        if (adjustedThreat >= 8) pool.push("placement");
+        if (adjustedThreat >= 9) pool.push("backlog");
+        if (adjustedThreat >= 10) pool.push("parent");
+        if (adjustedThreat >= 11) pool.push("striker");
+        if (adjustedThreat >= 13) pool.push("media");
+        if (adjustedThreat >= 16) pool.push("concern");
+
+        const baseCount = mode === "stage"
+          ? (WAVE_COUNTS[Math.min(2, wave - 1)] + Math.max(0, stageId - 1)) * tuning.countMultiplier
+          : 10 + wave * 2;
+        const count = Math.round(baseCount * plan.countMultiplier);
+        const gap = Math.max(0.42, 0.9 - Math.min(0.32, adjustedThreat * 0.014));
+        const stagePressure = mode === "stage" ? Math.max(0, stageId - 3) : 6 + Math.floor(wave / 2);
+        const wavePressure = wave - 1;
+        const eliteBias = firstStageWave ? 0.18 : 0.34 + Math.min(0.22, stagePressure * 0.03 + wavePressure * 0.04);
+        const weightedPool = pool.map((enemyKey, index) => {
+          const depth = pool.length <= 1 ? 0 : index / (pool.length - 1);
+          let weight = 1 - depth * eliteBias;
+          if (firstStageWave) weight *= 1 - depth * 0.55;
+          if (mode === "stage" && wave === 2) weight *= 1 - depth * 0.18;
+          if (mode === "stage" && stageId <= 5 && ENEMIES[enemyKey].threat >= 4) weight *= 0.5;
+          if (mode === "stage" && stageId <= 7 && ENEMIES[enemyKey].threat >= 5) weight *= 0.38;
+          if (mode === "stage" && stageId <= 9 && ENEMIES[enemyKey].threat >= 6) weight *= 0.3;
+          if (mode === "stage" && wave < 3 && ENEMIES[enemyKey].threat >= 6) weight *= 0.2;
+          if (ENEMIES[enemyKey].alwaysCounterAttack && mode === "stage" && stageId <= 8) weight *= 0.45;
+          return { enemyKey, weight: Math.max(0.08, weight) };
+        });
+        const pickWeightedEnemy = () => {
+          const totalWeight = weightedPool.reduce((sum, entry) => sum + entry.weight, 0);
+          let roll = Math.random() * totalWeight;
+          for (const entry of weightedPool) {
+            roll -= entry.weight;
+            if (roll <= 0) return entry.enemyKey;
+          }
+          return weightedPool[weightedPool.length - 1].enemyKey;
+        };
+        const spawns = [];
+        for (let i = 0; i < count; i += 1) {
+          let enemyKey = pool[Math.min(pool.length - 1, Math.floor((i / Math.max(1, count - 1)) * pool.length))];
+          if (Math.random() < 0.38) enemyKey = pickWeightedEnemy();
+          if (firstStageWave && ENEMIES[enemyKey].threat >= 4) enemyKey = Math.random() < 0.7 ? "urgent" : "merged";
+          spawns.push({ at: i * gap, enemyKey });
+        }
+
+        return {
+          ...plan,
+          spawns,
+          brief: `第 ${wave}${mode === "stage" ? " 波" : " 輪"}倒數結束後會直接開打。堡壘初始 HP ${state.fortressHpMax}。${firstStageWave ? "本波是資本累積波，怪物較少、較慢，擊殺回饋更高。" : event ? `本波事件是「${event.label}」。` : "本波沒有額外事件。"} `,
+        };
+      }
+
+      function startWave() {
+        state.phase = "combat";
+        state.spawnQueue = state.wavePlan.spawns.map((spawn) => ({ ...spawn }));
+        ui.phaseBadge.textContent = "階段：戰鬥中";
+        ui.waveBriefBox.innerHTML = `<strong>戰鬥中</strong> ${state.wavePlan.brief}`;
+      }
+
+      function loop(now) {
+        const dt = Math.min((now - state.lastFrame) / 1000, 0.033);
+        state.lastFrame = now;
+        update(dt);
+        render();
+        requestAnimationFrame(loop);
+      }
+
+      function update(dt) {
+        if (state.phase === "prep" && !state.runEnded && !state.rewardPending) {
+          state.countdown -= dt;
+          if (state.countdown <= 0) {
+            state.countdown = 0;
+            startWave();
+          }
+        }
+
+        if (state.phase === "combat") {
+          if (state.tempEffects.focusTimer > 0) {
+            state.tempEffects.focusTimer -= dt;
+          }
+          if (state.tempEffects.radarLockTimer > 0) {
+            state.tempEffects.radarLockTimer -= dt;
+            if (state.tempEffects.radarLockTimer <= 0) {
+              state.tempEffects.radarLockTimer = 0;
+              state.tempEffects.radarLockEnemyId = null;
+            }
+          }
+          if (state.tempEffects.traumaTimer > 0) state.tempEffects.traumaTimer = Math.max(0, state.tempEffects.traumaTimer - dt);
+          if (state.tempEffects.telepathyTimer > 0) state.tempEffects.telepathyTimer = Math.max(0, state.tempEffects.telepathyTimer - dt);
+          if (state.tempEffects.critTimer > 0) state.tempEffects.critTimer = Math.max(0, state.tempEffects.critTimer - dt);
+          if (state.tempEffects.starBoostTimer > 0) state.tempEffects.starBoostTimer = Math.max(0, state.tempEffects.starBoostTimer - dt);
+          if (state.tempEffects.healPulseTimer > 0) state.tempEffects.healPulseTimer = Math.max(0, state.tempEffects.healPulseTimer - dt);
+          updateSpawnQueue(dt);
+          updateTowers(dt);
+          updateProjectiles(dt);
+          updateEnemies(dt);
+          if (!state.spawnQueue.length && !state.enemies.length && !state.rewardPending && !state.runEnded) {
+            finishWave();
+          }
+        }
+
+        updateParticles(dt);
+        refreshUi();
+      }
+
+      function updateSpawnQueue(dt) {
+        state.spawnQueue.forEach((spawn) => { spawn.at -= dt; });
+        while (state.spawnQueue.length && state.spawnQueue[0].at <= 0) {
+          spawnEnemy(state.spawnQueue.shift().enemyKey);
+        }
+      }
+
+      function spawnEnemy(enemyKey) {
+        const spec = ENEMIES[enemyKey];
+        const threat = state.mode === "stage"
+          ? state.stage.id * 2 + state.stageWave
+          : 8 + state.endlessWave;
+        const hpScale = (1 + threat * 0.085) * (state.wavePlan.hpMultiplier || 1);
+        const speedScale = state.wavePlan.speedMultiplier * (state.wavePlan.enemySpeedMultiplier || 1);
+        const startPoint = cellCenter(state.stage.start.col, state.stage.start.row);
+        const pathCells = findPathFrom(state.stage.start.col, state.stage.start.row);
+        state.enemies.push({
+          id: state.nextEnemyId++,
+          enemyKey,
+          x: startPoint.x,
+          y: startPoint.y,
+          hp: Math.round(spec.hp * hpScale),
+          maxHp: Math.round(spec.hp * hpScale),
+          speed: spec.speed * speedScale,
+          reward: spec.reward + state.wavePlan.rewardBonus + Math.floor(threat / 5),
+          damage: spec.damage + state.wavePlan.fortressDamageBonus,
+          size: spec.size + Math.min(10, Math.floor(threat / 6)),
+          pathCells,
+          pathIndex: 1,
+          pathVersion: state.pathVersion,
+          slowTimer: 0,
+          slowFactor: 1,
+          disableTimer: spec.disableCooldown || 2.8,
+        });
+      }
+
+      function updateTowers(dt) {
+        state.towers.forEach((tower) => {
+          if (tower.upgradeFx > 0) tower.upgradeFx = Math.max(0, tower.upgradeFx - dt);
+          if (tower.disabled > 0) {
+            tower.disabled -= dt;
+            return;
+          }
+          tower.cooldown -= dt;
+          if (tower.cooldown > 0) return;
+          const recruit = RECRUIT_MAP[tower.recruitKey];
+          const profile = towerProfile(recruit, tower);
+          const center = cellCenter(tower.col, tower.row);
+          const target = chooseTarget(center, effectiveRange(recruit, tower));
+          if (!target) return;
+          tower.cooldown = recruit.rate * profile.cooldownMul * state.tempEffects.towerCooldownMultiplier;
+          fireProjectile(center, recruit, tower, target, profile);
+        });
+      }
+
+      function effectiveRange(recruit, tower) {
+        const rangeBoost = state.tempEffects.traumaTimer > 0 ? 1.18 : 1;
+        const profile = towerProfile(recruit, tower);
+        return recruit.range * rangeBoost * profile.rangeMul * (1 + (profile.level - 1) * 0.04);
+      }
+
+      function effectiveDamage(recruit, tower) {
+        const focusBoost = state.tempEffects.focusTimer > 0 ? 1.22 : 1;
+        const profile = towerProfile(recruit, tower);
+        return recruit.damage * profile.damageMul * (1 + (profile.level - 1) * 0.15) * focusBoost;
+      }
+
+      function activeRadarLockEnemy() {
+        if (state.tempEffects.radarLockTimer <= 0 || state.tempEffects.radarLockEnemyId == null) return null;
+        const enemy = state.enemies.find((item) => item.id === state.tempEffects.radarLockEnemyId) || null;
+        if (!enemy) {
+          state.tempEffects.radarLockEnemyId = null;
+          state.tempEffects.radarLockTimer = 0;
+        }
+        return enemy;
+      }
+
+      function chooseTargets(origin, range, limit = 1, options = {}) {
+        let candidates = state.enemies.filter((enemy) => Math.hypot(enemy.x - origin.x, enemy.y - origin.y) <= range);
+        if (!candidates.length) return [];
+        const radarTarget = options.allowRadar === false ? null : activeRadarLockEnemy();
+        if (radarTarget && candidates.some((enemy) => enemy.id === radarTarget.id)) {
+          candidates = [
+            radarTarget,
+            ...candidates.filter((enemy) => enemy.id !== radarTarget.id).sort((a, b) => enemyProgress(b) - enemyProgress(a)),
+          ];
+        } else {
+          candidates.sort((a, b) => enemyProgress(b) - enemyProgress(a));
+        }
+        return candidates.slice(0, limit);
+      }
+
+      function chooseTarget(origin, range, options = {}) {
+        return chooseTargets(origin, range, 1, options)[0] || null;
+      }
+
+      function enemyProgress(enemy) {
+        return enemy.pathIndex + enemy.x * 0.0001;
+      }
+
+      function spawnHomingProjectile(origin, recruit, target, payload = {}) {
+        state.projectiles.push({
+          type: payload.type || "shot",
+          x: origin.x,
+          y: origin.y,
+          targetId: target.id,
+          speed: payload.speed || 360,
+          damage: payload.damage,
+          recruitKey: recruit.key,
+          color: payload.color || recruit.color,
+          radius: payload.radius || 4,
+          applySlow: payload.applySlow ?? (state.tempEffects.traumaTimer > 0),
+          slowFactor: payload.slowFactor,
+          slowDuration: payload.slowDuration,
+          splashRadius: payload.splashRadius || 0,
+          splashMultiplier: payload.splashMultiplier || 0,
+          chainCount: payload.chainCount || 0,
+          chainRadius: payload.chainRadius || 0,
+          chainFalloff: payload.chainFalloff || 0.72,
+          pierceCount: payload.pierceCount || 0,
+          pierceRadius: payload.pierceRadius || 0,
+          radarLockDuration: payload.radarLockDuration || 0,
+          trail: payload.trail || false,
+          glow: payload.glow || 0,
+          heavyBonus: payload.heavyBonus || 1,
+          fastBonus: payload.fastBonus || 1,
+        });
+      }
+
+      function fireProjectile(origin, recruit, tower, target, profile = towerProfile(recruit, tower)) {
+        const damage = effectiveDamage(recruit, tower);
+        const range = effectiveRange(recruit, tower);
+        emitMuzzleFlash(origin.x, origin.y, recruit.color, 10 + profile.level * 2);
+        playFxTone(recruit.mode, 1 + profile.level * 0.05);
+        if (recruit.mode === "shotgun") {
+          const pelletTargets = chooseTargets(origin, range, profile.pellets);
+          while (pelletTargets.length < profile.pellets) pelletTargets.push(target);
+          pelletTargets.forEach((enemy, index) => {
+            spawnHomingProjectile(origin, recruit, enemy, {
+              type: "pellet",
+              damage: damage * profile.pelletDamageMul,
+              speed: 430 + index * 18,
+              radius: 3 + profile.level * 0.2,
+              heavyBonus: profile.heavyBonus,
+              applySlow: profile.applySlowOnHit || undefined,
+              slowFactor: profile.slowFactor,
+              slowDuration: profile.slowDuration,
+              glow: profile.glow,
+            });
+          });
+          return;
+        }
+        if (recruit.mode === "machinegun") {
+          const targets = chooseTargets(origin, range, profile.multishot);
+          while (targets.length < profile.multishot) targets.push(target);
+          targets.forEach((enemy) => {
+            spawnHomingProjectile(origin, recruit, enemy, {
+              type: "burst",
+              damage: damage / profile.multishot,
+              speed: profile.shotSpeed || 540,
+              radius: 2.5 + profile.level * 0.1,
+              trail: true,
+              applySlow: profile.applySlowOnHit || undefined,
+              slowFactor: profile.slowFactor,
+              slowDuration: profile.slowDuration,
+              glow: profile.glow,
+            });
+          });
+          return;
+        }
+        if (recruit.mode === "emp") {
+          spawnHomingProjectile(origin, recruit, target, {
+            type: "emp",
+            damage,
+            speed: 290,
+            radius: 6,
+            splashRadius: profile.splashRadius,
+            splashMultiplier: profile.splashMultiplier,
+            slowFactor: profile.slowFactor,
+            slowDuration: profile.slowDuration,
+            chainCount: profile.chainCount,
+            chainRadius: profile.chainRadius,
+            chainFalloff: 0.78,
+            glow: profile.glow,
+          });
+          return;
+        }
+        if (recruit.mode === "sniper") {
+          spawnHomingProjectile(origin, recruit, target, {
+            type: "sniper",
+            damage: damage * 1.82,
+            speed: 760,
+            radius: profile.projectileRadius,
+            pierceCount: profile.pierceCount,
+            pierceRadius: profile.pierceRadius,
+            trail: true,
+            heavyBonus: profile.heavyBonus,
+            glow: profile.glow,
+          });
+          return;
+        }
+        if (recruit.mode === "chain") {
+          spawnHomingProjectile(origin, recruit, target, {
+            type: "chain",
+            damage,
+            speed: 410,
+            radius: 5,
+            chainCount: profile.chainCount,
+            chainRadius: profile.chainRadius,
+            chainFalloff: profile.chainFalloff,
+            applySlow: profile.applySlowOnHit || undefined,
+            slowFactor: profile.slowFactor,
+            slowDuration: profile.slowDuration,
+            glow: profile.glow,
+          });
+          return;
+        }
+        if (recruit.mode === "radar") {
+          const targets = chooseTargets(origin, range, profile.multishot);
+          while (targets.length < profile.multishot) targets.push(target);
+          targets.forEach((enemy) => {
+            spawnHomingProjectile(origin, recruit, enemy, {
+              type: "radar",
+              damage: (damage * 0.72) / profile.multishot,
+              speed: 340,
+              radius: 6,
+              radarLockDuration: profile.radarLockDuration,
+              fastBonus: profile.fastBonus,
+              glow: profile.glow,
+            });
+          });
+          return;
+        }
+        if (recruit.mode === "rail") {
+          fireRailBeam(origin, recruit, damage, target, range, profile);
+          return;
+        }
+        const targets = chooseTargets(origin, range, profile.multishot);
+        while (targets.length < profile.multishot) targets.push(target);
+        targets.forEach((enemy) => {
+          spawnHomingProjectile(origin, recruit, enemy, {
+            damage: damage / profile.multishot,
+            speed: profile.shotSpeed || 360,
+            radius: profile.projectileRadius,
+            trail: profile.level >= 4,
+            fastBonus: profile.fastBonus,
+            glow: profile.glow,
+          });
+        });
+      }
+
+      function fireRailBeam(origin, recruit, damage, target, range, profile) {
+        const dx = target.x - origin.x;
+        const dy = target.y - origin.y;
+        const distance = Math.hypot(dx, dy) || 1;
+        const dirX = dx / distance;
+        const dirY = dy / distance;
+        const end = {
+          x: origin.x + dirX * range,
+          y: origin.y + dirY * range,
+        };
+        const hits = state.enemies
+          .map((enemy) => {
+            const toEnemyX = enemy.x - origin.x;
+            const toEnemyY = enemy.y - origin.y;
+            const projection = toEnemyX * dirX + toEnemyY * dirY;
+            const perpendicular = Math.abs(toEnemyX * dirY - toEnemyY * dirX);
+            return { enemy, projection, perpendicular };
+          })
+          .filter((entry) => entry.projection >= 0 && entry.projection <= range && entry.perpendicular <= entry.enemy.size + 10)
+          .sort((a, b) => a.projection - b.projection);
+        hits.forEach((entry, index) => {
+          applyDamageToEnemy(entry.enemy, {
+            recruitKey: recruit.key,
+            damage: damage * (index === 0 ? 1.18 : 0.78),
+            applySlow: profile.applySlowOnHit || state.tempEffects.traumaTimer > 0,
+            slowFactor: profile.slowFactor,
+            slowDuration: profile.slowDuration,
+          });
+        });
+        state.projectiles.push({
+          type: "beam",
+          color: recruit.color,
+          width: 8 + profile.level,
+          ttl: 0.14,
+          x1: origin.x,
+          y1: origin.y,
+          x2: end.x,
+          y2: end.y,
+          glow: profile.glow,
+        });
+      }
+
+      function applySlowToEnemy(enemy, baseFactor, duration) {
+        const adjustedFactor = Math.min(0.96, Math.max(0.42, baseFactor + state.wavePlan.slowResistance));
+        enemy.slowFactor = Math.min(enemy.slowFactor, adjustedFactor);
+        enemy.slowTimer = Math.max(enemy.slowTimer, duration);
+      }
+
+      function applyDamageToEnemy(enemy, attack) {
+        if (!enemy || !state.enemies.some((item) => item.id === enemy.id)) return { damage: 0, crit: false, killed: false };
+        const spec = ENEMIES[enemy.enemyKey];
+        const resistMultiplier = spec.resist?.[attack.recruitKey] ?? 1;
+        const critChance = state.tempEffects.critTimer > 0 ? 0.18 : 0;
+        const crit = attack.allowCrit === false ? false : Math.random() < critChance;
+        const heavyBoost = spec.threat >= 5 ? (attack.heavyBonus || 1) : 1;
+        const fastBoost = spec.speed >= 60 ? (attack.fastBonus || 1) : 1;
+        const damage = attack.damage * resistMultiplier * heavyBoost * fastBoost * (crit ? state.bonuses.critMultiplier : 1);
+        enemy.hp -= damage;
+        if (attack.applySlow) {
+          applySlowToEnemy(enemy, attack.slowFactor ?? 0.84, attack.slowDuration ?? 1.4);
+        }
+        if (damage > 0 && state.tempEffects.healPulseTimer > 0 && state.fortressHp > 0) {
+          state.fortressHp = Math.min(state.fortressHpMax, state.fortressHp + 0.32);
+        }
+        if (enemy.hp <= 0) {
+          killEnemy(enemy);
+          return { damage, crit, killed: true };
+        }
+        return { damage, crit, killed: false };
+      }
+
+      function emitMuzzleFlash(x, y, color, count) {
+        emitParticles(x, y, color, count);
+        state.projectiles.push({
+          type: "flash",
+          color,
+          ttl: 0.08,
+          radius: 10 + count * 0.18,
+          x,
+          y,
+        });
+      }
+
+      function applySplashDamage(originEnemy, projectile) {
+        if (!projectile.splashRadius || !projectile.splashMultiplier) return;
+        state.enemies.slice().forEach((enemy) => {
+          if (enemy.id === originEnemy.id) return;
+          if (Math.hypot(enemy.x - originEnemy.x, enemy.y - originEnemy.y) > projectile.splashRadius) return;
+          applyDamageToEnemy(enemy, {
+            recruitKey: projectile.recruitKey,
+            damage: projectile.damage * projectile.splashMultiplier,
+            applySlow: projectile.type === "emp" || projectile.applySlow,
+            slowFactor: projectile.type === "emp" ? 0.58 : projectile.slowFactor,
+            slowDuration: projectile.type === "emp" ? 2 : projectile.slowDuration,
+            allowCrit: false,
+          });
+        });
+      }
+
+      function applyChainDamage(originEnemy, projectile) {
+        if (!projectile.chainCount) return;
+        const hitIds = new Set([originEnemy.id]);
+        const segments = [];
+        let source = originEnemy;
+        let nextDamage = projectile.damage * projectile.chainFalloff;
+        for (let i = 0; i < projectile.chainCount; i += 1) {
+          const nextEnemy = state.enemies
+            .filter((enemy) => !hitIds.has(enemy.id) && Math.hypot(enemy.x - source.x, enemy.y - source.y) <= projectile.chainRadius)
+            .sort((a, b) => Math.hypot(a.x - source.x, a.y - source.y) - Math.hypot(b.x - source.x, b.y - source.y))[0];
+          if (!nextEnemy) break;
+          hitIds.add(nextEnemy.id);
+          segments.push({ x1: source.x, y1: source.y, x2: nextEnemy.x, y2: nextEnemy.y });
+          applyDamageToEnemy(nextEnemy, {
+            recruitKey: projectile.recruitKey,
+            damage: nextDamage,
+            allowCrit: false,
+          });
+          source = nextEnemy;
+          nextDamage *= projectile.chainFalloff;
+        }
+        if (segments.length) {
+          state.projectiles.push({
+            type: "arc",
+            color: projectile.color,
+            width: 3,
+            ttl: 0.12,
+            segments,
+          });
+        }
+      }
+
+      function applyPierceDamage(originEnemy, projectile) {
+        if (!projectile.pierceCount) return;
+        const nextTargets = state.enemies
+          .filter((enemy) => enemy.id !== originEnemy.id && Math.hypot(enemy.x - originEnemy.x, enemy.y - originEnemy.y) <= projectile.pierceRadius)
+          .sort((a, b) => enemyProgress(b) - enemyProgress(a))
+          .slice(0, projectile.pierceCount);
+        nextTargets.forEach((enemy) => {
+          applyDamageToEnemy(enemy, {
+            recruitKey: projectile.recruitKey,
+            damage: projectile.damage * 0.58,
+            applySlow: projectile.applySlow,
+            slowFactor: projectile.slowFactor,
+            slowDuration: projectile.slowDuration,
+            allowCrit: false,
+          });
+        });
+        if (nextTargets.length) {
+          state.projectiles.push({
+            type: "beam",
+            color: projectile.color,
+            width: 3,
+            ttl: 0.08,
+            x1: originEnemy.x,
+            y1: originEnemy.y,
+            x2: nextTargets[0].x,
+            y2: nextTargets[0].y,
+          });
+        }
+      }
+
+      function towerDamageForEnemy(spec) {
+        if (!spec.towerDamage) return 0;
+        const wavePressure = state.mode === "stage"
+          ? Math.max(0, state.stage.id + state.stageWave - 5)
+          : Math.max(0, state.endlessWave - 1);
+        return Math.round(spec.towerDamage * (1 + wavePressure * 0.065));
+      }
+
+      function damageTower(tower, enemy, damage) {
+        if (!tower || damage <= 0) return;
+        const center = cellCenter(tower.col, tower.row);
+        const spec = ENEMIES[enemy.enemyKey];
+        state.projectiles.push({
+          type: "beam",
+          color: spec.color,
+          width: 3.5,
+          ttl: 0.11,
+          x1: enemy.x,
+          y1: enemy.y,
+          x2: center.x,
+          y2: center.y,
+          glow: 0.8,
+        });
+        tower.hp = Math.max(0, tower.hp - damage);
+        emitParticles(center.x, center.y, "#b65249", 9);
+        if (tower.hp > 0) return;
+        const recruit = RECRUIT_MAP[tower.recruitKey];
+        const wasRouteTower = !hasExtraBuildCell(tower.col, tower.row);
+        state.towers = state.towers.filter((item) => item.id !== tower.id);
+        if (state.infoTowerId === tower.id) closeInfoModal();
+        if (state.drag?.kind === "tower" && state.drag.towerId === tower.id) clearDragState();
+        if (state.hoverTowerId === tower.id) {
+          state.hoverTowerId = null;
+          state.hoverSellTowerId = null;
+        }
+        emitMuzzleFlash(center.x, center.y, "#b65249", 22);
+        if (wasRouteTower) {
+          state.pathVersion += 1;
+          updateCurrentPath();
+          retargetEnemies();
+        }
+        toast(`${spec.label} 轟毀了 ${recruit.label}。`);
+      }
+
+      function applyRadarLock(enemy, projectile) {
+        if (!projectile.radarLockDuration) return;
+        const fallback = enemy && state.enemies.some((item) => item.id === enemy.id)
+          ? enemy
+          : state.enemies.slice().sort((a, b) => enemyProgress(b) - enemyProgress(a))[0];
+        if (!fallback) return;
+        state.tempEffects.radarLockEnemyId = fallback.id;
+        state.tempEffects.radarLockTimer = Math.max(state.tempEffects.radarLockTimer, projectile.radarLockDuration);
+      }
+
+      function updateProjectiles(dt) {
+        state.projectiles = state.projectiles.filter((projectile) => {
+          if (projectile.type === "beam" || projectile.type === "arc" || projectile.type === "flash") {
+            projectile.ttl -= dt;
+            return projectile.ttl > 0;
+          }
+          const target = state.enemies.find((enemy) => enemy.id === projectile.targetId);
+          if (!target) return false;
+          const dx = target.x - projectile.x;
+          const dy = target.y - projectile.y;
+          const distance = Math.hypot(dx, dy) || 1;
+          const step = projectile.speed * dt;
+          if (distance <= step) {
+            applyProjectileHit(target, projectile);
+            emitParticles(target.x, target.y, projectile.color, projectile.type === "emp" ? 12 : 8);
+            return false;
+          }
+          projectile.x += (dx / distance) * step;
+          projectile.y += (dy / distance) * step;
+          return true;
+        });
+      }
+
+      function applyProjectileHit(enemy, projectile) {
+        const result = applyDamageToEnemy(enemy, projectile);
+        if (projectile.type === "emp") applySplashDamage(enemy, projectile);
+        if (projectile.type === "chain") applyChainDamage(enemy, projectile);
+        if (projectile.type === "sniper") applyPierceDamage(enemy, projectile);
+        if (projectile.type === "radar") applyRadarLock(result.killed ? null : enemy, projectile);
+      }
+
+      function killEnemy(enemy) {
+        state.enemies = state.enemies.filter((item) => item.id !== enemy.id);
+        state.kills += 1;
+        state.score += enemy.reward;
+        state.totalScore += enemy.reward;
+      }
+
+      function updateEnemies(dt) {
+        state.enemies = state.enemies.filter((enemy) => {
+          if (enemy.slowTimer > 0) enemy.slowTimer -= dt;
+          else enemy.slowFactor = 1;
+
+          const spec = ENEMIES[enemy.enemyKey];
+          const canDisable = (state.tempEffects.enemyCounterAttack || spec.alwaysCounterAttack) && spec.canDisable;
+          const canBombard = !!(spec.towerDamage && (spec.alwaysTowerAttack || state.tempEffects.enemyCounterAttack));
+          if (canDisable || canBombard) {
+            enemy.disableTimer -= dt;
+            if (enemy.disableTimer <= 0) {
+              attackNearbyTower(enemy);
+              enemy.disableTimer = spec.disableCooldown || 3.3;
+            }
+          }
+
+          if (!enemy.pathCells || enemy.pathVersion !== state.pathVersion) {
+            const currentCell = pointToCell(enemy.x, enemy.y);
+            enemy.pathCells = findPathFrom(currentCell.col, currentCell.row);
+            enemy.pathIndex = 1;
+            enemy.pathVersion = state.pathVersion;
+          }
+
+          const nextCell = enemy.pathCells?.[enemy.pathIndex];
+          if (!nextCell) {
+            hitFortress(enemy);
+            return false;
+          }
+          const targetPoint = cellCenter(nextCell.col, nextCell.row);
+          const dx = targetPoint.x - enemy.x;
+          const dy = targetPoint.y - enemy.y;
+          const distance = Math.hypot(dx, dy) || 1;
+          const step = enemy.speed * enemy.slowFactor * (state.tempEffects.telepathyTimer > 0 ? 0.88 : 1) * dt;
+          if (distance <= step) {
+            enemy.x = targetPoint.x;
+            enemy.y = targetPoint.y;
+            enemy.pathIndex += 1;
+          } else {
+            enemy.x += (dx / distance) * step;
+            enemy.y += (dy / distance) * step;
+          }
+          return true;
+        });
+      }
+
+      function attackNearbyTower(enemy) {
+        const spec = ENEMIES[enemy.enemyKey];
+        const attackRange = spec.towerAttackRange || 92;
+        const candidates = state.towers
+          .map((tower) => ({
+            tower,
+            distance: Math.hypot(cellCenter(tower.col, tower.row).x - enemy.x, cellCenter(tower.col, tower.row).y - enemy.y),
+          }))
+          .filter((item) => item.distance <= attackRange)
+          .sort((a, b) => a.distance - b.distance);
+        if (!candidates.length) return;
+        if (spec.towerDamage && (spec.alwaysTowerAttack || state.tempEffects.enemyCounterAttack)) {
+          damageTower(candidates[0].tower, enemy, towerDamageForEnemy(spec));
+          return;
+        }
+        const disableTarget = candidates.find((item) => !towerHasCommandProtection(item.tower))?.tower || null;
+        if (!disableTarget) return;
+        disableTarget.disabled = 3;
+        toast(`${spec.label} 壓制低階塔位，造成短暫失效。`);
+      }
+
+      function hitFortress(enemy) {
+        state.fortressHp -= enemy.damage;
+        if (state.fortressHp <= 0) {
+          state.fortressHp = 0;
+          finishRun(false);
+        }
+      }
+
+      function finishWave() {
+        const wave = state.mode === "stage" ? state.stageWave : state.endlessWave;
+        const clearBonus = 18 + wave * 8 + (state.wavePlan?.clearBonusBoost || 0);
+        state.score += clearBonus;
+        state.totalScore += clearBonus;
+        const perfectHold = state.fortressHp === state.waveStartHp;
+        if (perfectHold) grantRewardCard();
+        if (state.mode === "stage" && state.stageWave >= 3) {
+          finishRun(true);
+          return;
+        }
+        if (state.mode === "stage") state.stageWave += 1;
+        else state.endlessWave += 1;
+        state.phase = "prep";
+        state.countdown = 8;
+        state.enemies = [];
+        state.projectiles = [];
+        prepareWave();
+        renderDock();
+        toast(perfectHold ? "完美守住本波，已獲得一張支援卡。" : "本波結束，下一波倒數開始。");
+      }
+
+      function grantRewardCard() {
+        const card = REWARD_CARDS[Math.floor(Math.random() * REWARD_CARDS.length)];
+        state.cardHand.push({
+          instanceId: state.nextCardId++,
+          cardId: card.id,
+        });
+        renderCardRack();
+      }
+
+      function finishRun(victory) {
+        state.runEnded = true;
+        state.phase = victory ? "victory" : "over";
+        state.enemies = [];
+        state.projectiles = [];
+        state.spawnQueue = [];
+        ui.summaryTitle.textContent = victory
+          ? state.mode === "stage" ? `第 ${state.stage.id} 關通關` : "無限模式結算"
+          : "社安網堡壘被摧毀";
+        ui.summaryBody.textContent = victory
+          ? `${state.mode === "stage" ? "你守住了這一關的三波攻擊。" : `你撐到了第 ${state.endlessWave} 波。`} 最終總積分 ${state.totalScore}，剩餘堡壘 HP ${state.fortressHp}。`
+          : `你在第 ${state.mode === "stage" ? state.stageWave : state.endlessWave} 波失守，最終總積分 ${state.totalScore}。`;
+        ui.summaryModal.hidden = false;
+        document.getElementById("summaryNextBtn").disabled = !(victory && state.mode === "stage" && state.stage.id < STAGES.length);
+        if (victory && state.mode === "stage") {
+          if (state.stage.id === state.progress.unlockedStage && state.progress.unlockedStage < STAGES.length) {
+            state.progress.unlockedStage += 1;
+          }
+          state.progress.clearedStages = Math.max(state.progress.clearedStages, state.stage.id);
+          saveProgress();
+          updateStageSelect();
+        }
+      }
+
+      function onCanvasHover(event) {
+        const rect = canvas.getBoundingClientRect();
+        const x = (event.clientX - rect.left) * (canvas.width / rect.width);
+        const y = (event.clientY - rect.top) * (canvas.height / rect.height);
+        const { col, row } = pointToCell(x, y);
+        const tower = towerByCanvasPoint(x, y) || towerAt(col, row);
+        if (tower && !state.drag) {
+          state.hoverTowerId = tower.id;
+          state.hoverEnemyId = null;
+          state.hoverSellTowerId = hitSellIcon(x, y, tower) ? tower.id : null;
+          state.hoverCell = null;
+          return;
+        }
+        const enemy = enemyByCanvasPoint(x, y);
+        if (enemy && !state.drag) {
+          state.hoverTowerId = null;
+          state.hoverEnemyId = enemy.id;
+          state.hoverSellTowerId = null;
+          state.hoverCell = null;
+          return;
+        }
+        if (!state.drag) {
+          state.hoverTowerId = null;
+          state.hoverEnemyId = null;
+          state.hoverSellTowerId = null;
+          state.hoverCell = null;
+          return;
+        }
+        state.hoverTowerId = null;
+        state.hoverEnemyId = null;
+        state.hoverSellTowerId = null;
+        state.hoverCell = isBuildableCell(col, row) ? { col, row } : null;
+        if (state.drag.kind === "tower") {
+          const towerDrag = state.towers.find((item) => item.id === state.drag.towerId);
+          if (towerDrag && state.hoverCell) {
+            const occupant = towerAt(state.hoverCell.col, state.hoverCell.row);
+            if (occupant && occupant.id !== towerDrag.id) {
+              state.previewPath = [];
+              state.previewMoveValid = occupant.recruitKey === towerDrag.recruitKey
+                && towerLevel(occupant) === towerLevel(towerDrag)
+                && towerLevel(occupant) < 5;
+            } else {
+              const preview = previewMovePath(towerDrag, state.hoverCell.col, state.hoverCell.row);
+              state.previewPath = preview.path || [];
+              state.previewMoveValid = preview.valid;
+            }
+          } else {
+            state.previewPath = [];
+            state.previewMoveValid = false;
+          }
+        }
+      }
+
+      function canvasBuildCell(event) {
+        const rect = canvas.getBoundingClientRect();
+        const x = (event.clientX - rect.left) * (canvas.width / rect.width);
+        const y = (event.clientY - rect.top) * (canvas.height / rect.height);
+        const { col, row } = pointToCell(x, y);
+        if (!isBuildableCell(col, row)) return null;
+        return { col, row };
+      }
+
+      function pointToCell(x, y) {
+        return {
+          col: Math.max(0, Math.min(GRID.cols - 1, Math.floor(x / GRID.cell))),
+          row: Math.max(0, Math.min(GRID.rows - 1, Math.floor(y / GRID.cell))),
+        };
+      }
+
+      function isBuildableCell(col, row) {
+        if ((col === state.stage.start.col && row === state.stage.start.row) || (col === state.stage.goal.col && row === state.stage.goal.row)) return false;
+        return state.stage.walkableSet.has(`${col},${row}`) || hasExtraBuildCell(col, row);
+      }
+
+      function clearDragState() {
+        if (state.drag?.timer) clearTimeout(state.drag.timer);
+        if (state.activePointerId !== null) {
+          try {
+            canvas.releasePointerCapture(state.activePointerId);
+          } catch (error) {
+            // ignore capture release errors
+          }
+        }
+        state.drag = null;
+        state.activePointerId = null;
+        state.hoverCell = null;
+        state.previewPath = [];
+        state.previewMoveValid = false;
+        ui.dragGhost.hidden = true;
+        renderDock();
+      }
+
+      function closeInfoModal() {
+        state.infoTowerId = null;
+        ui.sellTowerBtn.hidden = true;
+        ui.infoModal.hidden = true;
+      }
+
+      function sellValueForTower(tower) {
+        return Math.round((tower.invested || RECRUIT_MAP[tower.recruitKey].cost) * 0.5);
+      }
+
+      function extraBuildKey(col, row) {
+        return `${col},${row}`;
+      }
+
+      function hasExtraBuildCell(col, row) {
+        return state.extraBuildCells.some((cell) => cell.col === col && cell.row === row);
+      }
+
+      function isExpandableCell(col, row) {
+        if ((col === state.stage.start.col && row === state.stage.start.row) || (col === state.stage.goal.col && row === state.stage.goal.row)) return false;
+        if (state.stage.walkableSet.has(extraBuildKey(col, row))) return false;
+        if (hasExtraBuildCell(col, row)) return false;
+        if (towerAt(col, row)) return false;
+        return col >= 0 && col < GRID.cols && row >= 0 && row < GRID.rows;
+      }
+
+      function enemyByCanvasPoint(x, y) {
+        return state.enemies.find((enemy) => Math.hypot(x - enemy.x, y - enemy.y) <= enemy.size + 4) || null;
+      }
+
+      function enemyTraitSummary(enemy) {
+        const spec = ENEMIES[enemy.enemyKey];
+        const parts = [`血量 ${Math.round(enemy.hp)} / ${enemy.maxHp}`, `速度 ${Math.round(enemy.speed * enemy.slowFactor)}`];
+        if (spec.feature) parts.unshift(spec.feature);
+        if (spec.resist) {
+          const resistText = Object.entries(spec.resist)
+            .map(([key, value]) => `${RECRUIT_MAP[key].label} 抗性 ${Math.round((1 - value) * 100)}%`)
+            .join("、");
+          if (resistText) parts.push(resistText);
+        }
+        if (spec.canDisable) {
+          parts.push(spec.alwaysCounterAttack ? "會主動壓制低階塔" : state.tempEffects.enemyCounterAttack ? "目前可壓制低階塔" : "高壓事件下可壓制低階塔");
+        }
+        if (spec.towerDamage) {
+          parts.push(`砲火傷害 ${towerDamageForEnemy(spec)}`);
+        }
+        parts.push(`威脅值 ${spec.threat}`);
+        return parts.join("｜");
+      }
+
+      function enemyGuideDetails(enemyKey) {
+        const spec = ENEMIES[enemyKey];
+        const details = [
+          { text: `基礎血量 ${spec.hp}` },
+          { text: `移動速度 ${spec.speed}` },
+          { text: `堡壘傷害 ${spec.damage}` },
+          { text: `擊殺回饋 ${spec.reward}` },
+          { text: `威脅值 ${spec.threat}` },
+        ];
+        if (spec.resist) {
+          details.push({
+            text: `抗性：${Object.entries(spec.resist).map(([key, value]) => `${RECRUIT_MAP[key].label} -${Math.round((1 - value) * 100)}%`).join("、")}`,
+            danger: true,
+          });
+        }
+        if (spec.canDisable) {
+          details.push({
+            text: spec.alwaysCounterAttack ? "可主動壓制低階塔" : "高壓事件下可壓制低階塔",
+            danger: true,
+          });
+        }
+        if (spec.towerDamage) {
+          details.push({
+            text: `砲火攻塔 ${spec.towerDamage} 起｜範圍 ${spec.towerAttackRange || 92}`,
+            danger: true,
+          });
+        }
+        return details;
+      }
+
+      function enemyRadarMetrics(enemyKey) {
+        const spec = ENEMIES[enemyKey];
+        const all = Object.values(ENEMIES);
+        const maxHp = Math.max(...all.map((entry) => entry.hp));
+        const maxSpeed = Math.max(...all.map((entry) => entry.speed));
+        const maxDamage = Math.max(...all.map((entry) => entry.damage));
+        const maxReward = Math.max(...all.map((entry) => entry.reward));
+        const maxThreat = Math.max(...all.map((entry) => entry.threat));
+        const maxTower = Math.max(...all.map((entry) => entry.towerDamage || 0), 1);
+        return [
+          { label: "血量", value: spec.hp / maxHp },
+          { label: "速度", value: spec.speed / maxSpeed },
+          { label: "攻堡", value: spec.damage / maxDamage },
+          { label: "回饋", value: spec.reward / maxReward },
+          { label: "威脅", value: spec.threat / maxThreat },
+          { label: "壓塔", value: (spec.towerDamage || 0) / maxTower },
+        ];
+      }
+
+      function polygonPoints(values, radius, centerX, centerY) {
+        return values.map((value, index) => {
+          const angle = -Math.PI / 2 + (Math.PI * 2 * index) / values.length;
+          const x = centerX + Math.cos(angle) * radius * value;
+          const y = centerY + Math.sin(angle) * radius * value;
+          return `${x.toFixed(1)},${y.toFixed(1)}`;
+        }).join(" ");
+      }
+
+      function enemyRadarSvg(enemyKey) {
+        const metrics = enemyRadarMetrics(enemyKey);
+        const centerX = 73;
+        const centerY = 64;
+        const radius = 42;
+        const rings = [1, 0.75, 0.5, 0.25]
+          .map((scale) => `<polygon points="${polygonPoints(metrics.map(() => scale), radius, centerX, centerY)}" fill="none" stroke="rgba(160,136,108,0.28)" stroke-width="1" />`)
+          .join("");
+        const axes = metrics.map((metric, index) => {
+          const angle = -Math.PI / 2 + (Math.PI * 2 * index) / metrics.length;
+          const x = centerX + Math.cos(angle) * radius;
+          const y = centerY + Math.sin(angle) * radius;
+          const labelX = centerX + Math.cos(angle) * (radius + 14);
+          const labelY = centerY + Math.sin(angle) * (radius + 14);
+          return `<line x1="${centerX}" y1="${centerY}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="rgba(160,136,108,0.25)" stroke-width="1" />
+            <text x="${labelX.toFixed(1)}" y="${labelY.toFixed(1)}" text-anchor="middle" dominant-baseline="middle">${metric.label}</text>`;
+        }).join("");
+        const area = polygonPoints(metrics.map((metric) => Math.max(0.12, metric.value)), radius, centerX, centerY);
+        const spec = ENEMIES[enemyKey];
+        return `
+          <svg class="enemy-radar" viewBox="0 0 146 128" aria-hidden="true">
+            ${rings}
+            ${axes}
+            <polygon points="${area}" fill="${spec.color}55" stroke="${spec.color}" stroke-width="2" />
+            <circle cx="${centerX}" cy="${centerY}" r="2.2" fill="${spec.color}" />
+          </svg>
+        `;
+      }
+
+      function renderEnemyGuide() {
+        ui.enemyGuideGrid.innerHTML = "";
+        Object.entries(ENEMIES).forEach(([enemyKey, spec]) => {
+          const card = document.createElement("article");
+          card.className = "enemy-guide-card";
+          card.innerHTML = `
+            <div class="enemy-guide-top">
+              <div>
+                <h3><span class="enemy-swatch" style="background:${spec.color}"></span>${spec.label}</h3>
+                <p>${spec.feature || "標準壓力單位"}</p>
+              </div>
+              ${enemyRadarSvg(enemyKey)}
+            </div>
+            <div class="enemy-guide-meta">
+              ${enemyGuideDetails(enemyKey).map((detail) => `<div class="${detail.danger ? "danger-mark" : ""}">${detail.text}</div>`).join("")}
+            </div>
+          `;
+          ui.enemyGuideGrid.appendChild(card);
+        });
+      }
+
+      function onCanvasPointerDown(event) {
+        if (state.runEnded || state.rewardPending) return;
+        if (event.button !== undefined && event.button !== 0) return;
+        event.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const x = (event.clientX - rect.left) * (canvas.width / rect.width);
+        const y = (event.clientY - rect.top) * (canvas.height / rect.height);
+        const cell = canvasBuildCell(event) || pointToCell(x, y);
+        const tower = towerByCanvasPoint(x, y) || towerAt(cell.col, cell.row);
+        if (!tower) return;
+        state.activePointerId = event.pointerId ?? null;
+        if (state.activePointerId !== null) {
+          try {
+            canvas.setPointerCapture(state.activePointerId);
+          } catch (error) {
+            // ignore capture errors
+          }
+        }
+        if (hitSellIcon(x, y, tower)) {
+          sellTower(tower.id);
+          return;
+        }
+        startTowerPress(event, tower);
+      }
+
+      function startCardPress(event, recruit) {
+        if (state.runEnded || state.rewardPending) return;
+        event.preventDefault();
+        if (recruit.locked) {
+          toast(recruit.lockReason);
+          return;
+        }
+        const timer = setTimeout(() => {
+          if (!state.drag || state.drag.recruitKey !== recruit.key || state.drag.active) return;
+          openRecruitInfo(recruit.key);
+          state.drag.infoShown = true;
+        }, 420);
+        state.drag = {
+          kind: "recruit",
+          recruitKey: recruit.key,
+          startX: event.clientX,
+          startY: event.clientY,
+          x: event.clientX,
+          y: event.clientY,
+          active: false,
+          infoShown: false,
+          timer,
+        };
+        renderDock();
+      }
+
+      function startUtilityPress(event, tool) {
+        if (state.runEnded || state.rewardPending) return;
+        event.preventDefault();
+        const timer = setTimeout(() => {
+          if (!state.drag || state.drag.toolKey !== tool.key || state.drag.active) return;
+          state.infoTowerId = null;
+          ui.sellTowerBtn.hidden = true;
+          ui.infoTitle.textContent = tool.label;
+          ui.infoBody.textContent = `${tool.info} ${utilitySummary(tool)}。拖到草皮後會把那一格改造成新的可通行部署地，怪物也可能改線經過。`;
+          ui.infoModal.hidden = false;
+          state.drag.infoShown = true;
+        }, 420);
+        state.drag = {
+          kind: "utility",
+          toolKey: tool.key,
+          startX: event.clientX,
+          startY: event.clientY,
+          x: event.clientX,
+          y: event.clientY,
+          active: false,
+          infoShown: false,
+          timer,
+        };
+        renderDock();
+      }
+
+      function startTowerPress(event, tower) {
+        const recruit = RECRUIT_MAP[tower.recruitKey];
+        if (event.pointerType === "mouse") {
+          state.drag = {
+            kind: "tower",
+            towerId: tower.id,
+            startX: event.clientX,
+            startY: event.clientY,
+            x: event.clientX,
+            y: event.clientY,
+            active: true,
+            infoShown: false,
+            timer: null,
+          };
+          state.previewPath = [];
+          state.previewMoveValid = false;
+          return;
+        }
+        const timer = setTimeout(() => {
+          if (!state.drag || state.drag.towerId !== tower.id || state.drag.active) return;
+          state.infoTowerId = tower.id;
+          ui.infoTitle.textContent = `${recruit.label}｜第 ${towerLevel(tower)} 段`;
+          ui.infoBody.textContent = `${recruit.info} 射擊模式：${recruit.pattern}。${recruitSummary(recruit)}。${towerUpgradeSummary(recruit, tower)}。耐久 ${Math.round(tower.hp)} / ${tower.maxHp}。${towerHasCommandProtection(tower) ? "督導以上編制，不會被怪物打成失效，但仍可能被後段砲火削減耐久。" : "助理與社工仍可能被高壓怪短暫壓制失效。"} 這座塔目前可直接拖曳換位，拖到同類塔上可直接融合。賣出可返還 ${sellValueForTower(tower)} 積分。`;
+          ui.sellTowerBtn.hidden = false;
+          ui.infoModal.hidden = false;
+          state.drag.infoShown = true;
+        }, 420);
+        state.drag = {
+          kind: "tower",
+          towerId: tower.id,
+          startX: event.clientX,
+          startY: event.clientY,
+          x: event.clientX,
+          y: event.clientY,
+          active: false,
+          infoShown: false,
+          timer,
+        };
+      }
+
+      function onPointerMove(event) {
+        if (!state.drag) return;
+        if (state.activePointerId !== null && event.pointerId !== undefined && event.pointerId !== state.activePointerId) return;
+        event.preventDefault();
+        state.drag.x = event.clientX;
+        state.drag.y = event.clientY;
+        const moved = Math.hypot(event.clientX - state.drag.startX, event.clientY - state.drag.startY);
+        if (!state.drag.active && !state.drag.infoShown && moved > 10) {
+          clearTimeout(state.drag.timer);
+          state.drag.active = true;
+        }
+        if (state.drag.active) {
+          ui.dragGhost.hidden = false;
+          ui.dragGhost.style.left = `${state.drag.x}px`;
+          ui.dragGhost.style.top = `${state.drag.y}px`;
+          if (state.drag.kind === "tower") {
+            const tower = state.towers.find((item) => item.id === state.drag.towerId);
+            const recruit = tower ? RECRUIT_MAP[tower.recruitKey] : null;
+            ui.dragGhost.innerHTML = recruit
+              ? `<strong style="display:block;color:${recruit.color}">${recruit.label}</strong><div>拖曳到新塔位重新部署</div>`
+              : "";
+          } else if (state.drag.kind === "utility") {
+            const tool = UTILITY_ITEMS.find((item) => item.key === state.drag.toolKey);
+            ui.dragGhost.innerHTML = tool
+              ? `<strong style="display:block;color:${tool.color}">${tool.label}</strong><div>拖到草皮上開墾可改線的新塔位</div>`
+              : "";
+          } else {
+            const recruit = RECRUIT_MAP[state.drag.recruitKey];
+            ui.dragGhost.innerHTML = `<strong style="display:block;color:${recruit.color}">${recruit.label}</strong><div>拖到地圖可部署區</div>`;
+          }
+          state.hoverCell = pointToHoverCell(event.clientX, event.clientY);
+        }
+      }
+
+      function pointToHoverCell(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return null;
+        const x = (clientX - rect.left) * (canvas.width / rect.width);
+        const y = (clientY - rect.top) * (canvas.height / rect.height);
+        const { col, row } = pointToCell(x, y);
+        if (state.drag?.kind === "utility") return isExpandableCell(col, row) ? { col, row } : null;
+        if (!isBuildableCell(col, row)) return null;
+        return { col, row };
+      }
+
+      function onPointerUp(event) {
+        if (!state.drag) return;
+        if (state.activePointerId !== null && event?.pointerId !== undefined && event.pointerId !== state.activePointerId) return;
+        clearTimeout(state.drag.timer);
+        if (state.drag.active && state.hoverCell) {
+          if (state.drag.kind === "tower") {
+            attemptMoveTower(state.drag.towerId, state.hoverCell.col, state.hoverCell.row);
+          } else if (state.drag.kind === "utility") {
+            attemptUseUtility(state.drag.toolKey, state.hoverCell.col, state.hoverCell.row);
+          } else {
+            attemptDeploy(state.drag.recruitKey, state.hoverCell.col, state.hoverCell.row);
+          }
+        }
+        clearDragState();
+      }
+
+      function attemptMoveTower(towerId, col, row) {
+        const tower = state.towers.find((item) => item.id === towerId);
+        if (!tower) return;
+        if (tower.col === col && tower.row === row) return;
+        const targetTower = towerAt(col, row);
+        if (targetTower) {
+          if (targetTower.id === tower.id) return;
+          if (targetTower.recruitKey !== tower.recruitKey) {
+            toast("只有同類塔可以直接融合。");
+            return;
+          }
+          if (towerLevel(targetTower) !== towerLevel(tower)) {
+            toast("場上融合必須是同類、同段塔。");
+            return;
+          }
+          if ((targetTower.star || 0) >= 4) {
+            toast("這座塔已經達到第 5 段。");
+            return;
+          }
+          targetTower.star += 1;
+          targetTower.invested = (targetTower.invested || RECRUIT_MAP[targetTower.recruitKey].cost) + (tower.invested || RECRUIT_MAP[tower.recruitKey].cost);
+          targetTower.cooldown = Math.min(targetTower.cooldown, 0.08);
+          syncTowerDurability(targetTower, { fullHeal: true });
+          state.towers = state.towers.filter((item) => item.id !== tower.id);
+          triggerTowerUpgradeFx(targetTower, RECRUIT_MAP[targetTower.recruitKey].color);
+          refreshUi();
+          toast(`${RECRUIT_MAP[targetTower.recruitKey].label} 融合成功，提升到第 ${towerLevel(targetTower)} 段。`);
+          return;
+        }
+        if (!hasExtraBuildCell(col, row) && !canMoveTowerTo(tower, col, row)) {
+          toast("移動到這裡會讓路線封死。");
+          return;
+        }
+        const sourceOnRoute = !hasExtraBuildCell(tower.col, tower.row);
+        const targetOnRoute = !hasExtraBuildCell(col, row);
+        tower.col = col;
+        tower.row = row;
+        if (sourceOnRoute || targetOnRoute) {
+          state.pathVersion += 1;
+          updateCurrentPath();
+          retargetEnemies();
+        }
+        refreshUi();
+        toast("塔位已重新部署。");
+      }
+
+      function attemptUseUtility(toolKey, col, row) {
+        const tool = UTILITY_ITEMS.find((item) => item.key === toolKey);
+        if (!tool) return;
+        if (state.score < tool.cost) {
+          toast("積分不足，無法拓點。");
+          return;
+        }
+        if (!isExpandableCell(col, row)) {
+          toast("這塊地不能再拓成新塔位。");
+          return;
+        }
+        state.score -= tool.cost;
+        state.extraBuildCells.push({ col, row });
+        state.pathVersion += 1;
+        updateCurrentPath();
+        retargetEnemies();
+        refreshUi();
+        toast(`${tool.label} 完成，新增一格可通行部署地。`);
+      }
+
+      function sellTower(towerId) {
+        const tower = state.towers.find((item) => item.id === towerId);
+        if (!tower) return;
+        const refund = sellValueForTower(tower);
+        state.towers = state.towers.filter((item) => item.id !== towerId);
+        state.score += refund;
+        state.pathVersion += 1;
+        updateCurrentPath();
+        retargetEnemies();
+        refreshUi();
+        toast(`塔位已賣出，返還 ${refund} 積分。`);
+      }
+
+      function sellInfoTower() {
+        if (!state.infoTowerId) return;
+        const towerId = state.infoTowerId;
+        closeInfoModal();
+        sellTower(towerId);
+      }
+
+      function attemptDeploy(recruitKey, col, row) {
+        const recruit = RECRUIT_MAP[recruitKey];
+        const tower = towerAt(col, row);
+        if (!tower) {
+          if (state.score < recruit.cost) {
+            toast("積分不足，無法部署。");
+            return;
+          }
+          if (!canBlockAt(col, row)) {
+            toast("這個位置會把路線完全封死。");
+            return;
+          }
+          state.score -= recruit.cost;
+          state.towers.push({
+            id: state.nextTowerId++,
+            recruitKey,
+            col,
+            row,
+            cooldown: 0.1,
+            disabled: 0,
+            star: 0,
+            invested: recruit.cost,
+            hp: towerMaxHp(recruitKey, 0),
+            maxHp: towerMaxHp(recruitKey, 0),
+          });
+          state.pathVersion += 1;
+          updateCurrentPath();
+          retargetEnemies();
+          refreshUi();
+          toast(`${recruit.label} 已部署。`);
+          return;
+        }
+
+        const currentIndex = RECRUITS.findIndex((item) => item.key === tower.recruitKey);
+        const targetIndex = RECRUITS.findIndex((item) => item.key === recruitKey);
+        if (targetIndex < currentIndex) {
+          toast("不能把較低等級單位拖到更高等塔位。");
+          return;
+        }
+        if (targetIndex === currentIndex) {
+          const fusionCost = fusionCostForTower(tower);
+          if (state.score < fusionCost) {
+            toast("積分不足，無法合成。");
+            return;
+          }
+          if (tower.star >= 4) {
+            toast("這座塔已經達到第 5 段。");
+            return;
+          }
+          state.score -= fusionCost;
+          tower.star += 1;
+          tower.invested = (tower.invested || RECRUIT_MAP[tower.recruitKey].cost) + fusionCost;
+          tower.cooldown = Math.min(tower.cooldown, 0.08);
+          syncTowerDurability(tower, { fullHeal: true });
+          triggerTowerUpgradeFx(tower, recruit.color);
+          refreshUi();
+          toast(`${recruit.label} 合成成功，提升到第 ${towerLevel(tower)} 段。`);
+          return;
+        }
+        const diff = recruit.cost - RECRUITS[currentIndex].cost;
+        if (state.score < diff) {
+          toast("積分不足，無法升級。");
+          return;
+        }
+        state.score -= diff;
+        tower.recruitKey = recruitKey;
+        tower.invested = (tower.invested || RECRUIT_MAP[RECRUITS[currentIndex].key].cost) + diff;
+        syncTowerDurability(tower, { fullHeal: true });
+        triggerTowerUpgradeFx(tower, recruit.color, towerLevel(tower) + 1);
+        refreshUi();
+        toast(`${recruit.label} 已接手這個塔位。`);
+      }
+
+      function towerAt(col, row) {
+        return state.towers.find((tower) => tower.col === col && tower.row === row) || null;
+      }
+
+      function buildBlockedGrid(extraCell = null, ignoreTowerId = null) {
+        const blocked = Array.from({ length: GRID.rows }, () => Array(GRID.cols).fill(true));
+        state.stage.walkableCells.forEach((cell) => {
+          blocked[cell.row][cell.col] = false;
+        });
+        state.extraBuildCells.forEach((cell) => {
+          blocked[cell.row][cell.col] = false;
+        });
+        state.towers.forEach((tower) => {
+          if (tower.id === ignoreTowerId) return;
+          blocked[tower.row][tower.col] = true;
+        });
+        if (extraCell) blocked[extraCell.row][extraCell.col] = true;
+        blocked[state.stage.start.row][state.stage.start.col] = false;
+        blocked[state.stage.goal.row][state.stage.goal.col] = false;
+        return blocked;
+      }
+
+      function previewMovePath(tower, col, row) {
+        const blocked = buildBlockedGrid({ col, row }, tower.id);
+        const path = findPath(state.stage.start, state.stage.goal, blocked);
+        return { valid: !!path, path };
+      }
+
+      function findPath(start, goal, blocked) {
+        const queue = [start];
+        const visited = new Map();
+        const key = (col, row) => `${col},${row}`;
+        visited.set(key(start.col, start.row), null);
+        const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+        while (queue.length) {
+          const current = queue.shift();
+          if (current.col === goal.col && current.row === goal.row) {
+            const path = [];
+            let cursor = current;
+            while (cursor) {
+              path.push(cursor);
+              cursor = visited.get(key(cursor.col, cursor.row));
+            }
+            return path.reverse();
+          }
+          dirs.forEach(([dc, dr]) => {
+            const col = current.col + dc;
+            const row = current.row + dr;
+            if (col < 0 || col >= GRID.cols || row < 0 || row >= GRID.rows) return;
+            if (blocked[row][col]) return;
+            const nextKey = key(col, row);
+            if (visited.has(nextKey)) return;
+            const next = { col, row };
+            visited.set(nextKey, current);
+            queue.push(next);
+          });
+        }
+        return null;
+      }
+
+      function findPathFrom(col, row) {
+        const blocked = buildBlockedGrid();
+        blocked[row][col] = false;
+        return findPath({ col, row }, state.stage.goal, blocked);
+      }
+
+      function canBlockAt(col, row) {
+        const blocked = buildBlockedGrid({ col, row });
+        return !!findPath(state.stage.start, state.stage.goal, blocked);
+      }
+
+      function canMoveTowerTo(tower, col, row) {
+        return previewMovePath(tower, col, row).valid;
+      }
+
+      function updateCurrentPath() {
+        state.currentPath = findPath(state.stage.start, state.stage.goal, buildBlockedGrid()) || state.stage.routeCells;
+        ui.pathPill.textContent = state.pathVersion > 0 ? "路徑：已隨塔位改線" : "路徑：初始道路";
+      }
+
+      function retargetEnemies() {
+        state.enemies.forEach((enemy) => {
+          const cell = pointToCell(enemy.x, enemy.y);
+          enemy.pathCells = findPathFrom(cell.col, cell.row);
+          enemy.pathIndex = 1;
+          enemy.pathVersion = state.pathVersion;
+        });
+      }
+
+      function emitParticles(x, y, color, count) {
+        for (let i = 0; i < count; i += 1) {
+          state.particles.push({
+            x,
+            y,
+            vx: (Math.random() - 0.5) * 80,
+            vy: (Math.random() - 0.5) * 80,
+            life: 0.48 + Math.random() * 0.32,
+            color,
+            size: 2 + Math.random() * 3.6,
+          });
+        }
+      }
+
+      function updateParticles(dt) {
+        state.particles = state.particles.filter((particle) => {
+          particle.life -= dt;
+          particle.x += particle.vx * dt;
+          particle.y += particle.vy * dt;
+          return particle.life > 0;
+        });
+      }
+
+      function renderDock() {
+        const unlockedCount = towerUnlockCount();
+        ui.unlockPill.textContent = `塔種解鎖：${unlockedCount} / 9`;
+        ui.dockGrid.innerHTML = "";
+        UTILITY_ITEMS.forEach((tool) => {
+          const node = document.createElement("div");
+          node.className = `tower-card${state.drag?.toolKey === tool.key ? " dragging" : ""}`;
+          node.innerHTML = `
+            <div class="tower-visual">
+              <div class="tower-icon" style="background:${tool.color}">${tool.icon}</div>
+              <div class="tower-label">
+                <strong>${tool.label}</strong>
+                <span>花費 ${tool.cost} / ${tool.pattern}</span>
+              </div>
+            </div>
+            <div class="tower-meta">
+              <span>拖到草皮</span>
+              <span>新增可通行塔位</span>
+            </div>
+          `;
+          node.addEventListener("pointerdown", (event) => startUtilityPress(event, tool));
+          node.addEventListener("mouseenter", () => {
+            ui.hoverBadge.textContent = `${tool.label}｜${utilitySummary(tool)}`;
+          });
+          node.addEventListener("mouseleave", () => {
+            if (!state.drag?.active) ui.hoverBadge.textContent = "滑鼠移入或手機長按可看資訊";
+          });
+          ui.dockGrid.appendChild(node);
+        });
+        RECRUITS.forEach((recruit, index) => {
+          const unlocked = index < unlockedCount;
+          const div = document.createElement("div");
+          div.className = `tower-card${unlocked && state.drag?.recruitKey === recruit.key ? " dragging" : ""}${unlocked ? "" : " locked"}`;
+          if (unlocked) {
+            div.innerHTML = `
+              <div class="tower-visual">
+                <div class="tower-icon" style="background:${recruit.color}">${recruit.icon}</div>
+                <div class="tower-label">
+                  <strong>${recruit.label}</strong>
+                  <span>火力 ${recruit.damage} / 價格 ${recruit.cost}</span>
+                </div>
+              </div>
+              <div class="tower-meta">
+                <span>範圍 ${Math.round(recruit.range / 6)} 格</span>
+                <span>攻速 ${recruit.rate.toFixed(2)}s</span>
+              </div>
+            `;
+            div.addEventListener("pointerdown", (event) => startCardPress(event, recruit));
+            div.addEventListener("mouseenter", () => {
+              ui.hoverBadge.textContent = `${recruit.label}｜價 ${recruit.cost}｜${recruit.pattern}`;
+            });
+            div.addEventListener("mouseleave", () => {
+              if (!state.drag?.active) ui.hoverBadge.textContent = "滑鼠移入或手機長按可看資訊";
+            });
+          } else {
+            div.innerHTML = `
+              <div class="tower-visual">
+                <div class="tower-icon" style="background:#9ea5a4;color:#eef1ef">${recruit.icon}</div>
+              </div>
+            `;
+            div.addEventListener("mouseenter", () => {
+              ui.hoverBadge.textContent = "尚未解鎖的新部署單位";
+            });
+            div.addEventListener("mouseleave", () => {
+              if (!state.drag?.active) ui.hoverBadge.textContent = "滑鼠移入或手機長按可看資訊";
+            });
+          }
+          ui.dockGrid.appendChild(div);
+        });
+      }
+
+      function renderCardRack() {
+        if (!ui.cardRack) return;
+        ui.cardRack.innerHTML = "";
+        const launcher = document.createElement("button");
+        launcher.type = "button";
+        launcher.className = `card-chip${state.cardHand.length ? "" : " empty"}`;
+        launcher.textContent = "+";
+        launcher.disabled = !state.cardHand.length;
+        launcher.addEventListener("click", openHandModal);
+        launcher.addEventListener("mouseenter", () => {
+          ui.hoverBadge.textContent = state.cardHand.length
+            ? `支援卡手牌｜目前 ${state.cardHand.length} 張`
+            : "目前沒有可用支援卡";
+        });
+        launcher.addEventListener("mouseleave", () => {
+          if (!state.drag?.active) ui.hoverBadge.textContent = "滑鼠移入或手機長按可看資訊";
+        });
+        ui.cardRack.appendChild(launcher);
+
+        const count = document.createElement("div");
+        count.className = "card-count";
+        count.textContent = String(state.cardHand.length);
+        ui.cardRack.appendChild(count);
+      }
+
+      function activateCard(instanceId) {
+        const index = state.cardHand.findIndex((entry) => entry.instanceId === instanceId);
+        if (index === -1) return;
+        const card = REWARD_CARDS.find((item) => item.id === state.cardHand[index].cardId);
+        if (!card) return;
+        card.apply(state);
+        state.cardHand.splice(index, 1);
+        ui.handModal.hidden = true;
+        renderCardRack();
+        refreshUi();
+        toast(`已發動「${card.label}」。`);
+      }
+
+      function openHandModal() {
+        renderHandModal();
+        ui.handModal.hidden = false;
+      }
+
+      function renderHandModal() {
+        ui.handGrid.innerHTML = "";
+        if (!state.cardHand.length) {
+          ui.handGrid.innerHTML = `<div class="reward-card"><h3>目前沒有支援卡</h3><p>只有完美守住一波，才會把支援卡加入手牌。</p></div>`;
+          return;
+        }
+        state.cardHand.forEach((entry) => {
+          const card = REWARD_CARDS.find((item) => item.id === entry.cardId);
+          if (!card) return;
+          const node = document.createElement("div");
+          node.className = "reward-card";
+          node.innerHTML = `
+            <h3>${card.icon} ${card.label}</h3>
+            <p>${card.desc}</p>
+            <button type="button">施展</button>
+          `;
+          node.querySelector("button").addEventListener("click", () => activateCard(entry.instanceId));
+          ui.handGrid.appendChild(node);
+        });
+      }
+
+      function openRecruitInfo(recruitKey) {
+        const recruit = RECRUIT_MAP[recruitKey];
+        state.infoTowerId = null;
+        ui.sellTowerBtn.hidden = true;
+        ui.infoTitle.textContent = recruit.label;
+        ui.infoBody.textContent = `${recruit.icon} ${recruit.info} 射擊模式：${recruit.pattern}。${recruitSummary(recruit)}。價格 ${recruit.cost}。基礎耐久 ${towerMaxHp(recruit.key, 0)}。${recruitIndex(recruit.key) >= 2 ? "督導以上不受怪物失效限制，但會吃到後段怪的砲火傷害。" : "助理與社工仍會被高壓怪短暫壓制。"} `;
+        ui.infoModal.hidden = false;
+      }
+
+      function openCardInfo(cardId) {
+        const card = REWARD_CARDS.find((item) => item.id === cardId);
+        if (!card) return;
+        state.infoTowerId = null;
+        ui.sellTowerBtn.hidden = true;
+        ui.infoTitle.textContent = card.label;
+        ui.infoBody.textContent = `${card.icon} ${card.desc} 打開手牌後按下施展即可發動。`;
+        ui.infoModal.hidden = false;
+      }
+
+      function refreshUi() {
+        ui.fortressHpValue.textContent = `${Math.round(state.fortressHp)} / ${state.fortressHpMax}`;
+        ui.scoreValue.textContent = `${Math.round(state.score)}`;
+        ui.killsValue.textContent = `${state.kills}`;
+        ui.waveValue.textContent = state.mode === "stage"
+          ? `${state.stageWave} / 3`
+          : `${state.endlessWave} / ∞`;
+        ui.countdownValue.textContent = state.phase === "prep"
+          ? `${Math.ceil(Math.max(0, state.countdown))}s`
+          : state.phase === "combat"
+            ? "進行中"
+            : state.phase === "reward"
+              ? "選卡中"
+              : state.phase === "victory"
+                ? "通關"
+                : "失守";
+        ui.phaseBadge.textContent = `階段：${state.phase === "prep" ? "整備倒數" : state.phase === "combat" ? "戰鬥中" : state.phase === "reward" ? "選卡中" : state.phase === "victory" ? "通關" : "失守"}`;
+        if (state.drag?.active && state.hoverCell) {
+          if (state.drag.kind === "tower") {
+            const tower = state.towers.find((item) => item.id === state.drag.towerId);
+            const targetTower = towerAt(state.hoverCell.col, state.hoverCell.row);
+            if (tower && targetTower && targetTower.id !== tower.id) {
+              ui.hoverBadge.textContent = targetTower.recruitKey !== tower.recruitKey
+                ? "不同類塔不能直接融合"
+                : towerLevel(targetTower) !== towerLevel(tower)
+                  ? "場上融合必須是同類、同段塔"
+                  : `可直接融合｜${RECRUIT_MAP[tower.recruitKey].label} 會升到第 ${Math.min(5, towerLevel(targetTower) + 1)} 段並回滿耐久`;
+            } else {
+              ui.hoverBadge.textContent = tower && canMoveTowerTo(tower, state.hoverCell.col, state.hoverCell.row)
+                ? `可移動到 (${state.hoverCell.col + 1}, ${state.hoverCell.row + 1})`
+                : "此處移動會封死路線";
+            }
+          } else if (state.drag.kind === "utility") {
+            ui.hoverBadge.textContent = isExpandableCell(state.hoverCell.col, state.hoverCell.row)
+              ? `可開墾可改線塔位 (${state.hoverCell.col + 1}, ${state.hoverCell.row + 1})`
+              : "這裡不能開墾成新塔位";
+          } else {
+            const targetTower = towerAt(state.hoverCell.col, state.hoverCell.row);
+            const recruit = RECRUIT_MAP[state.drag.recruitKey];
+            if (targetTower) {
+              const currentIndex = recruitIndex(targetTower.recruitKey);
+              const targetIndex = recruitIndex(recruit.key);
+              if (targetIndex < currentIndex) {
+                ui.hoverBadge.textContent = "不能把較低職級拖到更高等塔位";
+              } else if (targetIndex === currentIndex) {
+                ui.hoverBadge.textContent = targetTower.star >= 4
+                  ? "這座塔已經達到第 5 段"
+                  : `可合成｜需 ${fusionCostForTower(targetTower)} 積分｜升段後回滿耐久`;
+              } else {
+                const diff = recruit.cost - RECRUIT_MAP[targetTower.recruitKey].cost;
+                ui.hoverBadge.textContent = `可升職｜需 ${diff} 積分｜接手後回滿耐久`;
+              }
+            } else {
+              ui.hoverBadge.textContent = canBlockAt(state.hoverCell.col, state.hoverCell.row)
+                ? `可部署 (${state.hoverCell.col + 1}, ${state.hoverCell.row + 1})`
+                : "此處會封死路線";
+            }
+          }
+        } else if (state.hoverTowerId) {
+          const tower = state.towers.find((item) => item.id === state.hoverTowerId);
+          if (tower) {
+            const recruit = RECRUIT_MAP[tower.recruitKey];
+            ui.hoverBadge.textContent = state.hoverSellTowerId === tower.id
+              ? `點擊賣塔｜返還 ${sellValueForTower(tower)} 積分`
+              : `${recruit.label}｜${recruit.pattern}｜第 ${towerLevel(tower)} 段｜耐久 ${Math.round(tower.hp)} / ${tower.maxHp}｜可賣 ${sellValueForTower(tower)}`;
+          } else {
+            ui.hoverBadge.textContent = "滑鼠移入或手機長按可看資訊";
+          }
+        } else if (state.hoverEnemyId) {
+          const enemy = state.enemies.find((item) => item.id === state.hoverEnemyId);
+          if (enemy) {
+            ui.hoverBadge.textContent = `${ENEMIES[enemy.enemyKey].label}｜${enemyTraitSummary(enemy)}`;
+          } else {
+            ui.hoverBadge.textContent = "滑鼠移入或手機長按可看資訊";
+          }
+        } else {
+          ui.hoverBadge.textContent = "滑鼠移入或手機長按可看資訊";
+        }
+        renderBuffStrip();
+        ui.submitScoreBtn.disabled = !(state.phase === "victory" || state.phase === "over") || state.levelSubmitted;
+      }
+
+      function renderBuffStrip() {
+        const items = [];
+        if (state.tempEffects.traumaTimer > 0) items.push(`創傷知情 ${Math.ceil(state.tempEffects.traumaTimer)}s`);
+        if (state.tempEffects.focusTimer > 0) items.push(`跨網協作 ${Math.ceil(state.tempEffects.focusTimer)}s`);
+        if (state.tempEffects.radarLockTimer > 0) items.push(`公用雷達 ${Math.ceil(state.tempEffects.radarLockTimer)}s`);
+        if (state.tempEffects.telepathyTimer > 0) items.push(`通靈技能 ${Math.ceil(state.tempEffects.telepathyTimer)}s`);
+        if (state.tempEffects.critTimer > 0) items.push(`法律暴擊 ${Math.ceil(state.tempEffects.critTimer)}s`);
+        if (state.tempEffects.starBoostTimer > 0) items.push(`長官支援 ${Math.ceil(state.tempEffects.starBoostTimer)}s`);
+        if (state.tempEffects.healPulseTimer > 0) items.push(`回穩修復 ${Math.ceil(state.tempEffects.healPulseTimer)}s`);
+        if (!items.length) items.push("尚未取得支援卡");
+        ui.buffStrip.innerHTML = items.map((item) => `<div class="pill">${item}</div>`).join("");
+      }
+
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawTerrain();
+        drawCurrentRoute();
+        drawPreviewRoute();
+        drawBuildGrid();
+        drawTowers();
+        drawEnemies();
+        drawSupportLinks();
+        drawProjectiles();
+        drawParticles();
+        drawFortress();
+      }
+
+      function drawTerrain() {
+        const currentPathSet = new Set(state.currentPath.map((cell) => `${cell.col},${cell.row}`));
+        for (let row = 0; row < GRID.rows; row += 1) {
+          for (let col = 0; col < GRID.cols; col += 1) {
+            const x = col * GRID.cell;
+            const y = row * GRID.cell;
+            const key = `${col},${row}`;
+            if (currentPathSet.has(key)) {
+              ctx.fillStyle = "#e4cfae";
+            } else if (state.stage.routeSet.has(key)) {
+              ctx.fillStyle = "#e7ded0";
+            } else if (hasExtraBuildCell(col, row)) {
+              ctx.fillStyle = (row + col + state.stage.id) % 2 === 0 ? "#dde9cf" : "#d2e0c2";
+            } else if (state.stage.walkableSet.has(key)) {
+              ctx.fillStyle = (row + col + state.stage.id) % 2 === 0 ? "#dce9d7" : "#d3e2cd";
+            } else {
+              ctx.fillStyle = (row * 2 + col + state.stage.id) % 2 === 0 ? "#b8c9b0" : "#adc0a7";
+            }
+            ctx.fillRect(x, y, GRID.cell, GRID.cell);
+            ctx.strokeStyle = "rgba(96, 110, 97, 0.12)";
+            ctx.strokeRect(x, y, GRID.cell, GRID.cell);
+            if (!state.stage.walkableSet.has(key) && !hasExtraBuildCell(col, row)) drawObstacle(x, y, col, row);
+          }
+        }
+      }
+
+      function drawObstacle(x, y, col, row) {
+        ctx.save();
+        if ((col + row + state.stage.id) % 2 === 0) {
+          ctx.fillStyle = "rgba(68, 100, 68, 0.28)";
+          ctx.beginPath();
+          ctx.arc(x + 18, y + 18, 9, 0, Math.PI * 2);
+          ctx.arc(x + 28, y + 24, 10, 0, Math.PI * 2);
+          ctx.arc(x + 20, y + 32, 8, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.fillStyle = "rgba(117, 106, 88, 0.26)";
+          ctx.fillRect(x + 16, y + 18, 26, 18);
+        }
+        ctx.restore();
+      }
+
+      function cellCenter(col, row) {
+        return {
+          x: col * GRID.cell + GRID.cell / 2,
+          y: row * GRID.cell + GRID.cell / 2,
+        };
+      }
+
+      function drawCurrentRoute() {
+        const points = state.currentPath.map((cell) => cellCenter(cell.col, cell.row));
+        if (points.length < 2) return;
+        ctx.save();
+        ctx.strokeStyle = state.pathVersion > 0 ? "rgba(88, 160, 197, 0.92)" : "rgba(255,255,255,0.5)";
+        ctx.lineWidth = 10;
+        ctx.setLineDash(state.pathVersion > 0 ? [12, 8] : []);
+        ctx.lineJoin = "round";
+        ctx.beginPath();
+        points.forEach((point, index) => {
+          if (index === 0) ctx.moveTo(point.x, point.y);
+          else ctx.lineTo(point.x, point.y);
+        });
+        ctx.stroke();
+        if (state.pathVersion > 0) {
+          ctx.fillStyle = "rgba(88, 160, 197, 0.18)";
+          state.currentPath.forEach((cell) => {
+            ctx.fillRect(cell.col * GRID.cell + 8, cell.row * GRID.cell + 8, GRID.cell - 16, GRID.cell - 16);
+          });
+        }
+        ctx.restore();
+      }
+
+      function drawPreviewRoute() {
+        if (!(state.drag?.kind === "tower") || !state.previewPath.length) return;
+        const points = state.previewPath.map((cell) => cellCenter(cell.col, cell.row));
+        ctx.save();
+        ctx.strokeStyle = state.previewMoveValid ? "rgba(73, 171, 126, 0.9)" : "rgba(182, 82, 73, 0.92)";
+        ctx.lineWidth = 10;
+        ctx.setLineDash([10, 8]);
+        ctx.lineJoin = "round";
+        ctx.beginPath();
+        points.forEach((point, index) => {
+          if (index === 0) ctx.moveTo(point.x, point.y);
+          else ctx.lineTo(point.x, point.y);
+        });
+        ctx.stroke();
+        ctx.fillStyle = state.previewMoveValid ? "rgba(73, 171, 126, 0.16)" : "rgba(182, 82, 73, 0.14)";
+        state.previewPath.forEach((cell) => {
+          ctx.fillRect(cell.col * GRID.cell + 10, cell.row * GRID.cell + 10, GRID.cell - 20, GRID.cell - 20);
+        });
+        ctx.restore();
+      }
+
+      function drawBuildGrid() {
+        const cells = [...state.stage.walkableCells, ...state.extraBuildCells];
+        cells.forEach((cell) => {
+          if ((cell.col === state.stage.start.col && cell.row === state.stage.start.row) || (cell.col === state.stage.goal.col && cell.row === state.stage.goal.row)) return;
+          const x = cell.col * GRID.cell + 7;
+          const y = cell.row * GRID.cell + 7;
+          const hover = state.hoverCell && state.hoverCell.col === cell.col && state.hoverCell.row === cell.row;
+          ctx.save();
+          const validCell = hasExtraBuildCell(cell.col, cell.row) ? true : canBlockAt(cell.col, cell.row);
+          ctx.strokeStyle = hover ? (validCell ? "#cc724d" : "#b65249") : "rgba(92, 109, 96, 0.18)";
+          ctx.lineWidth = hover ? 3 : 1;
+          ctx.strokeRect(x, y, GRID.cell - 14, GRID.cell - 14);
+          if (hover && state.drag?.active) {
+            ctx.fillStyle = validCell ? "rgba(204, 114, 77, 0.12)" : "rgba(182, 82, 73, 0.14)";
+            ctx.fillRect(x, y, GRID.cell - 14, GRID.cell - 14);
+          }
+          ctx.restore();
+        });
+        if (state.drag?.kind === "utility") {
+          state.stage.obstacleCells.forEach((cell) => {
+            if (!isExpandableCell(cell.col, cell.row)) return;
+            const x = cell.col * GRID.cell + 10;
+            const y = cell.row * GRID.cell + 10;
+            const hover = state.hoverCell && state.hoverCell.col === cell.col && state.hoverCell.row === cell.row;
+            ctx.save();
+            ctx.strokeStyle = hover ? "rgba(73, 171, 126, 0.95)" : "rgba(255, 249, 239, 0.28)";
+            ctx.lineWidth = hover ? 2.5 : 1;
+            ctx.setLineDash([6, 6]);
+            ctx.strokeRect(x, y, GRID.cell - 20, GRID.cell - 20);
+            ctx.restore();
+          });
+        }
+      }
+
+      function fortressVisualCenter() {
+        const goal = cellCenter(state.stage.goal.col, state.stage.goal.row);
+        return {
+          actual: goal,
+          x: Math.max(82, Math.min(canvas.width - 82, goal.x - 16)),
+          y: Math.max(98, Math.min(canvas.height - 86, goal.y)),
+        };
+      }
+
+      function drawFortress() {
+        const fortress = fortressVisualCenter();
+        const ratio = Math.max(0, state.fortressHp / state.fortressHpMax);
+        ctx.save();
+        ctx.fillStyle = "rgba(255, 248, 236, 0.92)";
+        ctx.fillRect(fortress.x - 52, fortress.y - 92, 104, 18);
+        ctx.strokeStyle = "rgba(177, 152, 122, 0.9)";
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(fortress.x - 52, fortress.y - 92, 104, 18);
+        ctx.fillStyle = "#23323a";
+        ctx.font = "bold 11px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(`堡壘 HP ${Math.round(state.fortressHp)} / ${state.fortressHpMax}`, fortress.x, fortress.y - 79);
+
+        ctx.strokeStyle = "rgba(95, 144, 132, 0.28)";
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.moveTo(fortress.actual.x, fortress.actual.y);
+        ctx.lineTo(fortress.x - 28, fortress.y);
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(95, 144, 132, 0.16)";
+        ctx.beginPath();
+        ctx.arc(fortress.x, fortress.y, 54, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "rgba(204, 114, 77, 0.52)";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(fortress.x, fortress.y, 58, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.fillStyle = "#657b7e";
+        ctx.fillRect(fortress.x - 42, fortress.y - 30, 84, 62);
+        ctx.fillStyle = "#4f6265";
+        ctx.fillRect(fortress.x - 32, fortress.y - 52, 20, 22);
+        ctx.fillRect(fortress.x + 12, fortress.y - 52, 20, 22);
+        ctx.fillStyle = "#d5724d";
+        ctx.fillRect(fortress.x - 4, fortress.y - 64, 8, 24);
+        ctx.beginPath();
+        ctx.moveTo(fortress.x + 4, fortress.y - 64);
+        ctx.lineTo(fortress.x + 24, fortress.y - 56);
+        ctx.lineTo(fortress.x + 4, fortress.y - 48);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = "#f4ead8";
+        ctx.fillRect(fortress.x - 10, fortress.y - 2, 20, 34);
+        ctx.fillStyle = "#2d3e46";
+        ctx.fillRect(fortress.x - 4, fortress.y + 8, 8, 24);
+
+        ctx.fillStyle = "#1f2d34";
+        ctx.beginPath();
+        ctx.arc(fortress.actual.x, fortress.actual.y, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#fff3d9";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(fortress.actual.x, fortress.actual.y, 18, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(0,0,0,0.22)";
+        ctx.fillRect(fortress.x - 42, fortress.y - 76, 84, 10);
+        ctx.fillStyle = "#cc724d";
+        ctx.fillRect(fortress.x - 42, fortress.y - 76, 84 * ratio, 10);
+
+        ctx.fillStyle = "#23323a";
+        ctx.font = "bold 12px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("社安網堡壘", fortress.x, fortress.y + 52);
+        ctx.restore();
+      }
+
+      function drawTowers() {
+        state.towers.forEach((tower) => {
+          const recruit = RECRUIT_MAP[tower.recruitKey];
+          const level = towerLevel(tower);
+          const center = cellCenter(tower.col, tower.row);
+          const hpRatio = Math.max(0, Math.min(1, (tower.hp ?? tower.maxHp ?? 1) / Math.max(1, tower.maxHp || 1)));
+          ctx.save();
+          ctx.fillStyle = tower.disabled > 0 ? "#b7b0aa" : recruit.color;
+          ctx.beginPath();
+          ctx.arc(center.x, center.y, 18 + (level - 1) * 2.5, 0, Math.PI * 2);
+          ctx.fill();
+          if (level > 1) {
+            ctx.strokeStyle = `${recruit.color}aa`;
+            ctx.lineWidth = 1.6 + level * 0.35;
+            ctx.beginPath();
+            ctx.arc(center.x, center.y, 23 + (level - 1) * 2.2, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "bold 18px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText(recruit.icon, center.x, center.y + 6);
+          if (level > 1) {
+            ctx.fillStyle = "#fff1aa";
+            ctx.font = "bold 12px sans-serif";
+            ctx.fillText(`段${level}`, center.x, center.y - 20);
+          }
+          if (state.tempEffects.starBoostTimer > 0) {
+            ctx.strokeStyle = "rgba(255, 241, 170, 0.92)";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(center.x, center.y, 24 + (level - 1) * 2.5, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+          if (tower.disabled > 0) {
+            ctx.strokeStyle = "#8b3f3d";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(center.x, center.y, 24, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+          if (tower.upgradeFx > 0) {
+            const pulse = tower.upgradeFx / 0.96;
+            ctx.strokeStyle = `rgba(255, 244, 199, ${0.35 + pulse * 0.45})`;
+            ctx.lineWidth = 4 + pulse * 3;
+            ctx.beginPath();
+            ctx.arc(center.x, center.y, 28 + pulse * 12, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.strokeStyle = `${recruit.color}${Math.round((0.4 + pulse * 0.5) * 255).toString(16).padStart(2, "0")}`;
+            ctx.lineWidth = 2 + pulse * 2;
+            ctx.beginPath();
+            ctx.arc(center.x, center.y, 20 + pulse * 8, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+          if (hpRatio < 0.999 || state.hoverTowerId === tower.id) {
+            ctx.fillStyle = "rgba(0,0,0,0.24)";
+            ctx.fillRect(center.x - 21, center.y - 31, 42, 5);
+            ctx.fillStyle = hpRatio > 0.55 ? "#fff1aa" : hpRatio > 0.28 ? "#f3a65c" : "#d45d57";
+            ctx.fillRect(center.x - 21, center.y - 31, 42 * hpRatio, 5);
+          }
+          if (hpRatio < 0.4) {
+            ctx.strokeStyle = "rgba(212, 93, 87, 0.9)";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(center.x, center.y, 26 + (level - 1) * 2.2, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+          if (state.hoverTowerId === tower.id && !state.drag) {
+            drawSellIcon(tower);
+          }
+          ctx.restore();
+        });
+
+        if (state.drag?.active && state.hoverCell && state.drag.kind !== "utility") {
+          const recruit = state.drag.kind === "tower"
+            ? RECRUIT_MAP[state.towers.find((item) => item.id === state.drag.towerId)?.recruitKey]
+            : RECRUIT_MAP[state.drag.recruitKey];
+          const tower = state.drag.kind === "tower"
+            ? state.towers.find((item) => item.id === state.drag.towerId)
+            : { star: 0 };
+          if (!recruit || !tower) return;
+          const profile = towerProfile(recruit, tower);
+          const center = cellCenter(state.hoverCell.col, state.hoverCell.row);
+          ctx.save();
+          ctx.strokeStyle = `${recruit.color}99`;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          const rangeBoost = state.tempEffects.traumaTimer > 0 ? 1.18 : 1;
+          ctx.arc(center.x, center.y, recruit.range * rangeBoost * profile.rangeMul * (1 + (profile.level - 1) * 0.04), 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      function drawSupportLinks() {
+        const lockedEnemy = activeRadarLockEnemy();
+        if (!lockedEnemy) return;
+        ctx.save();
+        ctx.strokeStyle = "rgba(201, 95, 70, 0.18)";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 8]);
+        state.towers.forEach((tower) => {
+          const center = cellCenter(tower.col, tower.row);
+          ctx.beginPath();
+          ctx.moveTo(center.x, center.y);
+          ctx.lineTo(lockedEnemy.x, lockedEnemy.y);
+          ctx.stroke();
+        });
+        ctx.fillStyle = "rgba(201, 95, 70, 0.14)";
+        ctx.beginPath();
+        ctx.arc(lockedEnemy.x, lockedEnemy.y, 22, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function sellIconPosition(tower) {
+        const center = cellCenter(tower.col, tower.row);
+        return { x: center.x + 20, y: center.y - 20, r: 12 };
+      }
+
+      function towerByCanvasPoint(x, y) {
+        return state.towers.find((tower) => {
+          const center = cellCenter(tower.col, tower.row);
+          return Math.hypot(x - center.x, y - center.y) <= 24 + (towerLevel(tower) - 1) * 2 || hitSellIcon(x, y, tower);
+        }) || null;
+      }
+
+      function hitSellIcon(x, y, tower) {
+        const icon = sellIconPosition(tower);
+        return Math.hypot(x - icon.x, y - icon.y) <= icon.r + 2;
+      }
+
+      function drawSellIcon(tower) {
+        const icon = sellIconPosition(tower);
+        ctx.save();
+        ctx.fillStyle = state.hoverSellTowerId === tower.id ? "#b65249" : "#cc724d";
+        ctx.beginPath();
+        ctx.arc(icon.x, icon.y, icon.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#fff7ef";
+        ctx.font = "bold 13px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("$", icon.x, icon.y + 4);
+        ctx.restore();
+      }
+
+      function drawEnemies() {
+        state.enemies.forEach((enemy) => {
+          const spec = ENEMIES[enemy.enemyKey];
+          ctx.save();
+          if (state.hoverEnemyId === enemy.id) {
+            ctx.strokeStyle = "rgba(35, 50, 58, 0.88)";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(enemy.x, enemy.y, enemy.size + 5, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+          ctx.fillStyle = spec.color;
+          ctx.beginPath();
+          ctx.arc(enemy.x, enemy.y, enemy.size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "rgba(0,0,0,0.22)";
+          ctx.fillRect(enemy.x - 20, enemy.y - enemy.size - 12, 40, 5);
+          ctx.fillStyle = "#fff7ef";
+          ctx.fillRect(enemy.x - 20, enemy.y - enemy.size - 12, 40 * Math.max(0, enemy.hp / enemy.maxHp), 5);
+          ctx.restore();
+        });
+      }
+
+      function drawProjectiles() {
+        state.projectiles.forEach((projectile) => {
+          ctx.save();
+          if (projectile.type === "flash") {
+            ctx.globalAlpha = Math.max(0.18, projectile.ttl / 0.08);
+            ctx.fillStyle = projectile.color;
+            ctx.beginPath();
+            ctx.arc(projectile.x, projectile.y, projectile.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+            return;
+          }
+          if (projectile.type === "beam") {
+            ctx.globalAlpha = Math.max(0.22, projectile.ttl / 0.14);
+            ctx.strokeStyle = projectile.color;
+            ctx.lineWidth = projectile.width || 4;
+            ctx.shadowColor = projectile.color;
+            ctx.shadowBlur = 8 + (projectile.glow || 0) * 12;
+            ctx.beginPath();
+            ctx.moveTo(projectile.x1, projectile.y1);
+            ctx.lineTo(projectile.x2, projectile.y2);
+            ctx.stroke();
+            ctx.restore();
+            return;
+          }
+          if (projectile.type === "arc") {
+            ctx.globalAlpha = Math.max(0.24, projectile.ttl / 0.12);
+            ctx.strokeStyle = projectile.color;
+            ctx.lineWidth = projectile.width || 3;
+            ctx.shadowColor = projectile.color;
+            ctx.shadowBlur = 10;
+            projectile.segments.forEach((segment) => {
+              ctx.beginPath();
+              ctx.moveTo(segment.x1, segment.y1);
+              ctx.lineTo(segment.x2, segment.y2);
+              ctx.stroke();
+            });
+            ctx.restore();
+            return;
+          }
+          if (projectile.glow) {
+            ctx.shadowColor = projectile.color;
+            ctx.shadowBlur = 6 + projectile.glow * 10;
+          }
+          if (projectile.trail) {
+            ctx.strokeStyle = `${projectile.color}88`;
+            ctx.lineWidth = projectile.type === "sniper" ? 3 : 2;
+            ctx.beginPath();
+            ctx.moveTo(projectile.x - 9, projectile.y - 2);
+            ctx.lineTo(projectile.x, projectile.y);
+            ctx.stroke();
+          }
+          ctx.fillStyle = projectile.color;
+          ctx.beginPath();
+          ctx.arc(projectile.x, projectile.y, projectile.radius || 4, 0, Math.PI * 2);
+          ctx.fill();
+          if (projectile.type === "emp" || projectile.type === "radar") {
+            ctx.strokeStyle = "#fff7ef";
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(projectile.x, projectile.y, (projectile.radius || 4) + 3, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+          ctx.restore();
+        });
+      }
+
+      function drawParticles() {
+        state.particles.forEach((particle) => {
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, particle.life);
+          ctx.fillStyle = particle.color;
+          ctx.fillRect(particle.x, particle.y, particle.size || 3, particle.size || 3);
+          ctx.restore();
+        });
+      }
+
+      function localScores() {
+        try {
+          return JSON.parse(localStorage.getItem(SCORE_KEY) || "[]");
+        } catch (error) {
+          return [];
+        }
+      }
+
+      function saveLocalScore(entry) {
+        const scores = localScores();
+        scores.push(entry);
+        scores.sort((a, b) => b.score - a.score || b.wave - a.wave);
+        localStorage.setItem(SCORE_KEY, JSON.stringify(scores.slice(0, 40)));
+      }
+
+      async function submitScore() {
+        const normalizedName = (ui.playerName.value || "").trim().toLowerCase();
+        if (normalizedName === CREATOR_CODE) {
+          unlockAllRoles();
+          ui.playerName.value = "";
+          return;
+        }
+        if (normalizedName === TOKEN_MAX_CODE) {
+          grantMaxTokens();
+          ui.playerName.value = "";
+          return;
+        }
+        const entry = {
+          name: (ui.playerName.value || "匿名社工").trim().slice(0, 16),
+          region: (ui.playerRegion.value || "Local").trim().slice(0, 18),
+          score: Math.round(state.totalScore),
+          wave: state.mode === "stage" ? state.stageWave : state.endlessWave,
+          outcome: state.phase,
+          stage: state.mode === "stage" ? state.stage.id : "endless",
+          timestamp: new Date().toISOString(),
+        };
+        saveLocalScore(entry);
+        state.levelSubmitted = true;
+        toast("成績已寫入本機排行榜。");
+        if (LEADERBOARD_CONFIG.endpoint) {
+          try {
+            const response = await fetch(LEADERBOARD_CONFIG.endpoint, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                action: "submit",
+                gameId: LEADERBOARD_CONFIG.gameId,
+                ...entry,
+              }),
+            });
+            if (!response.ok) throw new Error(`Leaderboard sync failed: ${response.status}`);
+            toast("成績已同步到全球排行榜。");
+          } catch (error) {
+            toast("遠端同步失敗，已保留本機成績。");
+          }
+        }
+        refreshLeaderboard();
+        refreshUi();
+      }
+
+      async function refreshLeaderboard() {
+        let entries = localScores().slice(0, 10);
+        if (LEADERBOARD_CONFIG.endpoint) {
+          try {
+            const response = await fetch(`${LEADERBOARD_CONFIG.endpoint}?action=leaderboard&gameId=${encodeURIComponent(LEADERBOARD_CONFIG.gameId)}`);
+            if (!response.ok) throw new Error(`Leaderboard read failed: ${response.status}`);
+            const data = await response.json();
+            entries = data.leaderboard || entries;
+            ui.boardNote.textContent = "目前顯示遠端全球排行榜。";
+          } catch (error) {
+            ui.boardNote.textContent = "遠端排行榜讀取失敗，已退回本機排行榜。";
+          }
+        } else {
+          ui.boardNote.textContent = "未設定遠端端點，因此顯示本機排行榜。";
+        }
+        renderLeaderboard(entries);
+      }
+
+      function renderLeaderboard(entries) {
+        ui.leaderboard.innerHTML = `
+          <div class="board-head">
+            <div>#</div>
+            <div>玩家</div>
+            <div>分數</div>
+            <div>波次</div>
+          </div>
+        `;
+        if (!entries.length) {
+          ui.leaderboard.innerHTML += `<div class="board-row"><div class="rank">-</div><div>尚無資料</div><div>0</div><div>0</div></div>`;
+          return;
+        }
+        entries.forEach((entry, index) => {
+          ui.leaderboard.innerHTML += `
+            <div class="board-row">
+              <div class="rank">${index + 1}</div>
+              <div>${escapeHtml(entry.name || "匿名")} ${entry.region ? `<span style="color:#6e787d;font-size:11px">/${escapeHtml(entry.region)}</span>` : ""}</div>
+              <div>${Math.round(entry.score || 0)}</div>
+              <div>${entry.wave || 0}</div>
+            </div>
+          `;
+        });
+      }
+
+      function escapeHtml(text) {
+        return String(text)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#39;");
+      }
+
+      function toast(message) {
+        ui.toast.textContent = message;
+        ui.toast.hidden = false;
+        clearTimeout(toast.timer);
+        toast.timer = setTimeout(() => { ui.toast.hidden = true; }, 2400);
+      }
+
+      init();
+    </script>
+  </body>
+</html>
