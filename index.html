@@ -904,17 +904,22 @@
       }
 
       body.ui-mobile .app {
+        min-height: 100svh;
+        height: 100svh;
         grid-template-rows: minmax(0, 1fr);
         gap: 0;
-        padding: 6px;
+        padding: 4px;
+        overflow: hidden;
       }
 
       body.ui-mobile .battle-panel {
         width: 100%;
         height: 100%;
-        padding: 6px;
-        gap: 6px;
+        padding: 4px;
+        gap: 4px;
         grid-template-rows: auto minmax(0, 1fr) auto;
+        align-content: start;
+        overflow: hidden;
       }
 
       body.ui-mobile .top-actions {
@@ -930,6 +935,7 @@
       body.ui-mobile .arena-topline {
         width: 100%;
         gap: 4px 8px;
+        min-height: 18px;
       }
 
       body.ui-mobile .arena-mini {
@@ -957,25 +963,29 @@
       }
 
       body.ui-mobile .arena-wrap {
-        width: 100%;
+        width: min(100%, calc((var(--mobile-vh, 100svh) - 68px) * 1.5));
         min-height: 0;
         height: auto;
+        max-height: calc(var(--mobile-vh, 100svh) - 68px);
         aspect-ratio: 12 / 8;
         border-radius: 14px;
         padding: 0;
+        margin: 0 auto;
       }
 
       body.ui-mobile .mobile-top-dock {
         position: absolute;
-        top: 8px;
-        left: 8px;
-        right: 96px;
+        top: 6px;
+        left: 6px;
+        right: 88px;
         display: flex;
         align-items: stretch;
-        gap: 6px;
+        gap: 4px;
         padding-bottom: 2px;
         overflow-x: auto;
         overflow-y: hidden;
+        touch-action: pan-x;
+        overscroll-behavior-x: contain;
         scrollbar-width: none;
         z-index: 4;
       }
@@ -986,26 +996,26 @@
 
       body.ui-mobile .mobile-stage-chip {
         position: absolute;
-        top: 8px;
-        right: 8px;
-        width: 38px;
-        height: 38px;
+        top: 6px;
+        right: 6px;
+        width: 34px;
+        height: 34px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 12px;
+        border-radius: 10px;
         border: 1px solid rgba(177, 152, 122, 0.85);
         background: rgba(255, 250, 242, 0.96);
         color: var(--ink);
-        font-size: 18px;
+        font-size: 16px;
         box-shadow: 0 10px 22px rgba(33, 28, 18, 0.18);
         z-index: 5;
       }
 
       body.ui-mobile .mobile-control-chip {
         position: absolute;
-        top: 8px;
-        right: 52px;
+        top: 6px;
+        right: 44px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -1023,11 +1033,11 @@
       body.ui-mobile .mobile-hint {
         position: relative;
         display: block;
-        padding: 7px 10px;
+        padding: 6px 10px;
         border-radius: 12px;
         background: rgba(204, 114, 77, 0.95);
         color: #fff8ef;
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 800;
         text-align: center;
         box-shadow: 0 10px 18px rgba(33, 28, 18, 0.18);
@@ -1054,19 +1064,20 @@
       }
 
       body.ui-mobile .mobile-tower-card {
-        min-width: 72px;
-        min-height: 58px;
-        padding: 5px 6px;
-        border-radius: 12px;
+        min-width: 62px;
+        min-height: 50px;
+        padding: 4px 5px;
+        border-radius: 11px;
         border: 1px solid rgba(177, 152, 122, 0.82);
         background: rgba(255, 250, 242, 0.95);
         display: grid;
         grid-template-rows: auto auto;
-        gap: 4px;
+        gap: 3px;
         align-content: center;
         justify-items: center;
         box-shadow: 0 8px 16px rgba(33, 28, 18, 0.12);
         flex: 0 0 auto;
+        touch-action: none;
       }
 
       body.ui-mobile .mobile-tower-card.dragging {
@@ -1079,21 +1090,21 @@
       }
 
       body.ui-mobile .mobile-tower-card .tower-icon {
-        width: 36px;
-        height: 36px;
-        font-size: 20px;
+        width: 31px;
+        height: 31px;
+        font-size: 17px;
       }
 
       body.ui-mobile .mobile-card-label {
         text-align: center;
-        font-size: 9px;
+        font-size: 8px;
         line-height: 1.15;
         color: var(--ink);
       }
 
       body.ui-mobile .mobile-card-label strong {
         display: block;
-        font-size: 9px;
+        font-size: 8px;
         font-weight: 800;
       }
 
@@ -1105,6 +1116,77 @@
 
       body.ui-mobile canvas {
         align-self: stretch;
+      }
+
+      @media (orientation: landscape) and (max-height: 500px) {
+        body.ui-mobile .app {
+          padding: 2px;
+        }
+
+        body.ui-mobile .battle-panel {
+          padding: 2px;
+          gap: 2px;
+        }
+
+        body.ui-mobile .arena-topline {
+          min-height: 16px;
+        }
+
+        body.ui-mobile .arena-wrap {
+          width: min(100%, calc((var(--mobile-vh, 100svh) - 56px) * 1.5));
+          max-height: calc(var(--mobile-vh, 100svh) - 56px);
+        }
+
+        body.ui-mobile .mobile-top-dock {
+          top: 4px;
+          left: 4px;
+          right: 78px;
+          gap: 3px;
+        }
+
+        body.ui-mobile .mobile-stage-chip,
+        body.ui-mobile .mobile-control-chip {
+          top: 4px;
+          width: 30px;
+          height: 30px;
+          font-size: 14px;
+        }
+
+        body.ui-mobile .mobile-control-chip {
+          right: 40px;
+        }
+
+        body.ui-mobile .mobile-stage-chip {
+          right: 4px;
+        }
+
+        body.ui-mobile .mobile-tower-card {
+          min-width: 56px;
+          min-height: 44px;
+          padding: 3px 4px;
+        }
+
+        body.ui-mobile .mobile-tower-card .tower-icon {
+          width: 27px;
+          height: 27px;
+          font-size: 15px;
+        }
+
+        body.ui-mobile .mobile-card-label,
+        body.ui-mobile .mobile-card-label strong {
+          font-size: 7px;
+        }
+
+        body.ui-mobile .card-chip {
+          width: 34px;
+          height: 34px;
+          font-size: 16px;
+        }
+
+        body.ui-mobile .mobile-hint {
+          padding: 5px 8px;
+          font-size: 9px;
+        }
       }
 
       @media (max-width: 560px) {
@@ -2105,6 +2187,7 @@
         hoverSellTowerId: null,
         drag: null,
         activePointerId: null,
+        dragPointerTarget: null,
         infoTowerId: null,
         cardHand: [],
         nextCardId: 1,
@@ -2117,6 +2200,17 @@
         levelSubmitted: false,
       };
 
+      function updateViewportMetrics() {
+        const viewportHeight = Math.round(window.visualViewport?.height || window.innerHeight || 0);
+        const viewportWidth = Math.round(window.visualViewport?.width || window.innerWidth || 0);
+        if (viewportHeight) {
+          document.documentElement.style.setProperty("--mobile-vh", `${viewportHeight}px`);
+        }
+        if (viewportWidth) {
+          document.documentElement.style.setProperty("--mobile-vw", `${viewportWidth}px`);
+        }
+      }
+
       function init() {
         if (new URLSearchParams(window.location.search).get("creator") === "1") {
           state.progress.creatorUnlocked = true;
@@ -2127,6 +2221,7 @@
         ui.introModal.hidden = true;
         updateStageSelect();
         bindEvents();
+        updateViewportMetrics();
         loadSelectedStage("stage-1");
         refreshLeaderboard();
         requestAnimationFrame(loop);
@@ -2307,6 +2402,12 @@
           state.hoverTowerId = null;
           state.hoverEnemyId = null;
         });
+        window.addEventListener("resize", updateViewportMetrics);
+        window.addEventListener("orientationchange", updateViewportMetrics);
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener("resize", updateViewportMetrics);
+          window.visualViewport.addEventListener("scroll", updateViewportMetrics);
+        }
         ui.playerName.addEventListener("keydown", (event) => {
           if (event.key !== "Enter") return;
           const input = (ui.playerName.value || "").trim().toLowerCase();
@@ -3334,13 +3435,14 @@
         if (state.drag?.timer) clearTimeout(state.drag.timer);
         if (state.activePointerId !== null) {
           try {
-            canvas.releasePointerCapture(state.activePointerId);
+            (state.dragPointerTarget || canvas).releasePointerCapture(state.activePointerId);
           } catch (error) {
             // ignore capture release errors
           }
         }
         state.drag = null;
         state.activePointerId = null;
+        state.dragPointerTarget = null;
         state.hoverCell = null;
         state.previewPath = [];
         state.previewMoveValid = false;
@@ -3516,19 +3618,22 @@
         const cell = canvasBuildCell(event) || pointToCell(x, y);
         const tower = towerByCanvasPoint(x, y) || towerAt(cell.col, cell.row);
         if (!tower) return;
-        state.activePointerId = event.pointerId ?? null;
-        if (state.activePointerId !== null) {
-          try {
-            canvas.setPointerCapture(state.activePointerId);
-          } catch (error) {
-            // ignore capture errors
-          }
-        }
         if (hitSellIcon(x, y, tower)) {
           sellTower(tower.id);
           return;
         }
         startTowerPress(event, tower);
+      }
+
+      function captureDragPointer(event) {
+        state.activePointerId = event.pointerId ?? null;
+        state.dragPointerTarget = event.currentTarget || canvas;
+        if (state.activePointerId === null || !state.dragPointerTarget?.setPointerCapture) return;
+        try {
+          state.dragPointerTarget.setPointerCapture(state.activePointerId);
+        } catch (error) {
+          // ignore capture errors
+        }
       }
 
       function startCardPress(event, recruit) {
@@ -3538,6 +3643,7 @@
           toast(recruit.lockReason);
           return;
         }
+        captureDragPointer(event);
         const timer = setTimeout(() => {
           if (!state.drag || state.drag.recruitKey !== recruit.key || state.drag.active) return;
           openRecruitInfo(recruit.key);
@@ -3560,6 +3666,7 @@
       function startUtilityPress(event, tool) {
         if (state.runEnded || state.rewardPending) return;
         event.preventDefault();
+        captureDragPointer(event);
         const timer = setTimeout(() => {
           if (!state.drag || state.drag.toolKey !== tool.key || state.drag.active) return;
           state.infoTowerId = null;
@@ -3585,6 +3692,7 @@
 
       function startTowerPress(event, tower) {
         const recruit = RECRUIT_MAP[tower.recruitKey];
+        captureDragPointer(event);
         if (event.pointerType === "mouse") {
           state.drag = {
             kind: "tower",
