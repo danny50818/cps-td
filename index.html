@@ -40,6 +40,12 @@
           linear-gradient(180deg, #f8f4ec, #efe5d4 100%);
       }
 
+      body.ui-mobile {
+        background:
+          linear-gradient(180deg, rgba(95, 144, 132, 0.12), transparent 18%),
+          linear-gradient(180deg, #f6f1e8, #eadfcd 100%);
+      }
+
       button,
       select,
       input {
@@ -76,8 +82,8 @@
       .topbar {
         padding: 12px;
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        gap: 10px;
+        grid-template-columns: 1fr;
+        gap: 8px;
         align-items: center;
       }
 
@@ -102,11 +108,21 @@
         flex-wrap: wrap;
       }
 
+      .top-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
+      }
+
+      .top-actions button {
+        width: 100%;
+      }
+
       .stagebar {
-        padding: 10px 12px;
+        padding: 9px 10px;
         display: grid;
         grid-template-columns: 1fr;
-        gap: 10px;
+        gap: 8px;
         align-items: center;
       }
 
@@ -117,19 +133,25 @@
 
       .stage-meta strong {
         display: block;
-        font-size: 18px;
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .stage-meta span {
         color: var(--muted);
-        font-size: 12px;
-        line-height: 1.5;
+        font-size: 10px;
+        line-height: 1.3;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .stage-picker {
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto;
-        gap: 8px;
+        gap: 6px;
         align-items: center;
       }
 
@@ -178,7 +200,7 @@
       }
 
       .side-hud {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
       }
 
       .stat {
@@ -192,13 +214,13 @@
       .stat small {
         display: block;
         color: var(--muted);
-        font-size: 11px;
+        font-size: 9px;
       }
 
       .stat strong {
         display: block;
-        margin-top: 4px;
-        font-size: clamp(14px, 3vw, 20px);
+        margin-top: 3px;
+        font-size: clamp(11px, 1.8vw, 15px);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -209,6 +231,7 @@
         display: grid;
         gap: 8px;
         min-height: 0;
+        justify-items: center;
       }
 
       .note-box {
@@ -228,11 +251,15 @@
         position: relative;
         min-height: 0;
         height: 100%;
+        width: min(100%, 1020px);
         aspect-ratio: 12 / 8;
         border-radius: 18px;
         overflow: hidden;
         border: 1px solid #cfbea6;
         background: #d8e5d2;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.45),
+          0 18px 34px rgba(71, 48, 22, 0.12);
       }
 
       canvas {
@@ -244,37 +271,41 @@
 
       .arena-topline {
         display: flex;
-        flex-wrap: wrap;
-        gap: 8px 12px;
+        flex-wrap: nowrap;
+        gap: 8px;
         align-items: center;
         justify-content: flex-start;
         min-width: 0;
+        width: min(100%, 1020px);
+        padding-block: 2px;
+        min-height: 24px;
+        overflow: hidden;
       }
 
       .arena-mini {
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         gap: 6px;
         align-items: center;
         justify-content: flex-start;
+        min-width: 0;
+        flex: 0 1 auto;
+        overflow: hidden;
       }
 
       .arena-center {
         display: flex;
-        flex-wrap: wrap;
-        gap: 6px 12px;
+        flex-wrap: nowrap;
+        gap: 8px;
         align-items: center;
         min-width: 0;
+        flex: 1 1 auto;
+        justify-content: flex-end;
+        overflow: hidden;
       }
 
       .note-box.compact {
-        max-width: 100%;
-        padding: 0;
-        border: 0;
-        background: none;
-        box-shadow: none;
-        font-size: 11px;
-        line-height: 1.4;
+        display: none;
       }
 
       .phase-badge {
@@ -282,19 +313,24 @@
         color: var(--ink);
         border: 0;
         width: fit-content;
-        padding: 0;
+        padding: 2px 0;
+        line-height: 1.25;
         font-weight: 800;
       }
 
       .hint-badge {
         max-width: 100%;
-        padding: 0;
+        padding: 2px 0;
         border-radius: 0;
         background: none;
         color: var(--accent-deep);
         font-size: 11px;
         font-weight: 700;
+        line-height: 1.25;
         text-align: left;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .card-rack {
@@ -305,6 +341,13 @@
         align-items: center;
         gap: 8px;
         z-index: 3;
+      }
+
+      .mobile-top-dock,
+      .mobile-stage-chip,
+      .mobile-hint,
+      .mobile-control-chip {
+        display: none;
       }
 
       .card-chip {
@@ -471,7 +514,7 @@
       }
 
       .pill {
-        padding: 0;
+        padding: 2px 0;
         border-radius: 0;
         background: none;
         border: 0;
@@ -479,6 +522,7 @@
         color: var(--muted);
         white-space: nowrap;
         font-weight: 700;
+        line-height: 1.25;
       }
 
       .drag-ghost {
@@ -540,6 +584,38 @@
         margin: 0 0 10px;
         line-height: 1.75;
         color: #4a5a61;
+      }
+
+      .mode-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      .mode-choice {
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid #e3d5c1;
+        background: var(--panel-soft);
+        text-align: left;
+      }
+
+      .mode-choice h3 {
+        margin: 0 0 8px;
+        font-size: 18px;
+      }
+
+      .mode-choice p {
+        margin: 0 0 12px;
+        font-size: 13px;
+        line-height: 1.65;
+      }
+
+      .mode-tip {
+        margin-top: 10px;
+        font-size: 12px;
+        color: var(--muted);
       }
 
       .reward-grid,
@@ -700,6 +776,7 @@
 
         .arena-topline {
           gap: 6px;
+          width: 100%;
         }
 
         .arena-mini {
@@ -723,13 +800,17 @@
         }
 
         .top-actions {
-          justify-content: flex-start;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .mode-grid {
+          grid-template-columns: 1fr;
         }
       }
 
       @media (min-width: 981px) {
         .app {
-          grid-template-columns: minmax(780px, 1fr) 390px;
+          grid-template-columns: minmax(720px, 1fr) 356px;
           grid-template-rows: minmax(0, 1fr);
           align-items: stretch;
         }
@@ -748,7 +829,7 @@
         }
 
         .topbar {
-          padding: 10px 12px;
+          padding: 9px 10px;
         }
 
         .brand h1 {
@@ -757,6 +838,10 @@
 
         .brand p {
           font-size: 11px;
+        }
+
+        .stagebar {
+          padding: 8px 10px;
         }
 
         .stage-meta strong {
@@ -802,6 +887,224 @@
         .dock {
           min-height: 240px;
         }
+      }
+
+      #killsStat {
+        display: none;
+      }
+
+      body.ui-mobile .brand p,
+      body.ui-mobile #introBtn,
+      body.ui-mobile #unlockPill,
+      body.ui-mobile #pathPill,
+      body.ui-mobile #waveBriefBox,
+      body.ui-mobile .info-strip,
+      body.ui-mobile .sidebar {
+        display: none;
+      }
+
+      body.ui-mobile .app {
+        grid-template-rows: minmax(0, 1fr);
+        gap: 0;
+        padding: 6px;
+      }
+
+      body.ui-mobile .battle-panel {
+        width: 100%;
+        height: 100%;
+        padding: 6px;
+        gap: 6px;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+      }
+
+      body.ui-mobile .top-actions {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      body.ui-mobile .top-actions button,
+      body.ui-mobile .stage-picker button {
+        padding: 8px 6px;
+        font-size: 12px;
+      }
+
+      body.ui-mobile .arena-topline {
+        width: 100%;
+        gap: 4px 8px;
+      }
+
+      body.ui-mobile .arena-mini {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      body.ui-mobile .stagebar,
+      body.ui-mobile .dock,
+      body.ui-mobile .topbar {
+        display: none;
+      }
+
+      body.ui-mobile .phase-badge {
+        display: none;
+      }
+
+      body.ui-mobile .hint-badge {
+        display: none;
+      }
+
+      body.ui-mobile .pill {
+        font-size: 10px;
+      }
+
+      body.ui-mobile .arena-wrap {
+        width: 100%;
+        min-height: 0;
+        height: auto;
+        aspect-ratio: 12 / 8;
+        border-radius: 14px;
+        padding: 0;
+      }
+
+      body.ui-mobile .mobile-top-dock {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        right: 96px;
+        display: flex;
+        align-items: stretch;
+        gap: 6px;
+        padding-bottom: 2px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none;
+        z-index: 4;
+      }
+
+      body.ui-mobile .mobile-top-dock::-webkit-scrollbar {
+        display: none;
+      }
+
+      body.ui-mobile .mobile-stage-chip {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        border: 1px solid rgba(177, 152, 122, 0.85);
+        background: rgba(255, 250, 242, 0.96);
+        color: var(--ink);
+        font-size: 18px;
+        box-shadow: 0 10px 22px rgba(33, 28, 18, 0.18);
+        z-index: 5;
+      }
+
+      body.ui-mobile .mobile-control-chip {
+        position: absolute;
+        top: 8px;
+        right: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        border: 1px solid rgba(177, 152, 122, 0.85);
+        background: rgba(255, 250, 242, 0.96);
+        color: var(--ink);
+        font-size: 17px;
+        box-shadow: 0 8px 18px rgba(33, 28, 18, 0.14);
+        z-index: 5;
+      }
+
+      body.ui-mobile .mobile-hint {
+        position: relative;
+        display: block;
+        padding: 7px 10px;
+        border-radius: 12px;
+        background: rgba(204, 114, 77, 0.95);
+        color: #fff8ef;
+        font-size: 11px;
+        font-weight: 800;
+        text-align: center;
+        box-shadow: 0 10px 18px rgba(33, 28, 18, 0.18);
+        z-index: 4;
+      }
+
+      body.ui-mobile .card-rack {
+        right: 8px;
+        bottom: 8px;
+        gap: 6px;
+      }
+
+      body.ui-mobile .card-chip {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        font-size: 18px;
+      }
+
+      body.ui-mobile .card-count {
+        min-width: 22px;
+        padding: 4px 6px;
+        font-size: 11px;
+      }
+
+      body.ui-mobile .mobile-tower-card {
+        min-width: 72px;
+        min-height: 58px;
+        padding: 5px 6px;
+        border-radius: 12px;
+        border: 1px solid rgba(177, 152, 122, 0.82);
+        background: rgba(255, 250, 242, 0.95);
+        display: grid;
+        grid-template-rows: auto auto;
+        gap: 4px;
+        align-content: center;
+        justify-items: center;
+        box-shadow: 0 8px 16px rgba(33, 28, 18, 0.12);
+        flex: 0 0 auto;
+      }
+
+      body.ui-mobile .mobile-tower-card.dragging {
+        outline: 2px solid var(--accent);
+      }
+
+      body.ui-mobile .mobile-tower-card.locked {
+        opacity: 0.42;
+        filter: grayscale(0.7);
+      }
+
+      body.ui-mobile .mobile-tower-card .tower-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 20px;
+      }
+
+      body.ui-mobile .mobile-card-label {
+        text-align: center;
+        font-size: 9px;
+        line-height: 1.15;
+        color: var(--ink);
+      }
+
+      body.ui-mobile .mobile-card-label strong {
+        display: block;
+        font-size: 9px;
+        font-weight: 800;
+      }
+
+      body.ui-mobile .mobile-card-label span {
+        display: block;
+        margin-top: 1px;
+        color: var(--muted);
+      }
+
+      body.ui-mobile canvas {
+        align-self: stretch;
       }
 
       @media (max-width: 560px) {
@@ -879,16 +1182,20 @@
           </div>
         </div>
         <div class="arena-wrap">
+          <div class="mobile-top-dock" id="mobileDockGrid"></div>
+          <button type="button" class="mobile-control-chip" id="mobileControlBtn" aria-label="打開控制選單">☰</button>
+          <button type="button" class="mobile-stage-chip" id="mobileStageBtn" aria-label="選擇關卡">⌘</button>
           <canvas id="gameCanvas" width="720" height="480"></canvas>
           <div class="card-rack" id="cardRack"></div>
         </div>
+        <div class="mobile-hint" id="mobileHintBadge">長按單位可看資訊</div>
       </main>
 
       <aside class="sidebar">
         <header class="topbar panel">
           <div class="brand">
-            <h1>遊戲資訊</h1>
-            <p>桌機優先。拖曳部署、改變路徑、守住社安網堡壘；手機也能用長按查看單位資訊。</p>
+            <h1>指揮面板</h1>
+            <p>桌機版保留完整關卡與支援資訊，手機版會精簡資訊，把重點留給拖曳部署與合成操作。</p>
           </div>
           <div class="top-actions">
             <button class="ghost" id="introBtn">開場故事</button>
@@ -902,7 +1209,7 @@
           <div class="stage-row">
             <div class="stage-meta">
               <strong id="stageTitle">第 1 關：初案進場</strong>
-              <span id="stageSubtitle">每關 3 波，過關才能解鎖下一關。通過第 4 關才會解鎖無限模式。</span>
+              <span id="stageSubtitle">3 波制｜第 4 關後開放無限模式</span>
             </div>
             <div class="stage-picker">
               <select id="stageSelect"></select>
@@ -910,23 +1217,23 @@
             </div>
           </div>
           <div class="hud side-hud">
-            <div class="stat panel">
+            <div class="stat panel" id="fortressStat">
               <small>堡壘 HP</small>
               <strong id="fortressHpValue">11</strong>
             </div>
-            <div class="stat panel">
+            <div class="stat panel" id="scoreStat">
               <small>可用積分</small>
               <strong id="scoreValue">80</strong>
             </div>
-            <div class="stat panel">
+            <div class="stat panel" id="waveStat">
               <small>波次</small>
               <strong id="waveValue">1 / 3</strong>
             </div>
-            <div class="stat panel">
+            <div class="stat panel" id="killsStat">
               <small>已擊破</small>
               <strong id="killsValue">0</strong>
             </div>
-            <div class="stat panel">
+            <div class="stat panel" id="countdownStat">
               <small>倒數</small>
               <strong id="countdownValue">10s</strong>
             </div>
@@ -947,6 +1254,26 @@
     </div>
 
     <div class="drag-ghost" id="dragGhost" hidden></div>
+
+    <div class="modal" id="profileModal">
+      <div class="dialog">
+        <h2>選擇操作模式</h2>
+        <p>先選擇你這一局要用的操作介面。桌機版會保留完整戰況與關卡資訊，手機版會簡化文字，讓更多空間留給拖曳與合成。</p>
+        <div class="mode-grid">
+          <div class="mode-choice">
+            <h3>電腦版</h3>
+            <p>適合滑鼠操作。保留完整關卡說明、支援狀態與較高資訊密度，方便精細排塔與觀察改線。</p>
+            <button type="button" id="selectDesktopBtn">使用電腦版</button>
+          </div>
+          <div class="mode-choice">
+            <h3>手機版</h3>
+            <p>適合橫向觸控操作。介面會簡化成核心數值與操作提示，讓地圖與拖曳熱區更乾淨。</p>
+            <button type="button" id="selectMobileBtn">使用手機版</button>
+          </div>
+        </div>
+        <div class="mode-tip">若使用手機，建議橫向操作；支援的瀏覽器會嘗試切成橫屏。</div>
+      </div>
+    </div>
 
     <div class="modal" id="introModal">
       <div class="dialog">
@@ -1044,6 +1371,34 @@
       </div>
     </div>
 
+    <div class="modal" id="mobileStageModal" hidden>
+      <div class="dialog">
+        <h2>選擇關卡</h2>
+        <div class="form-grid">
+          <select id="mobileStageSelect"></select>
+          <div class="inline-actions">
+            <button id="mobileLoadStageBtn">載入</button>
+            <button class="ghost" id="closeMobileStageBtn">關閉</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="mobileControlModal" hidden>
+      <div class="dialog">
+        <h2>控制選單</h2>
+        <div class="inline-actions">
+          <button class="ghost" id="mobileIntroBtn">開場故事</button>
+          <button class="ghost" id="mobileGuideBtn">怪物圖鑑</button>
+          <button class="ghost" id="mobileLeaderboardBtn">排行榜</button>
+          <button class="secondary" id="mobileRestartBtn">重開本局</button>
+        </div>
+        <div class="modal-actions">
+          <button id="closeMobileControlBtn">關閉</button>
+        </div>
+      </div>
+    </div>
+
     <div class="toast" id="toast" hidden></div>
 
     <script>
@@ -1053,6 +1408,7 @@
       };
 
       const PROGRESS_KEY = "frontline-guardian-progress";
+      const UI_PROFILE_KEY = "frontline-guardian-ui-profile";
       const SCORE_KEY = "frontline-guardian-v4-scores";
       const GRID = { cols: 12, rows: 8, cell: 60 };
       const WAVE_COUNTS = [7, 10, 13];
@@ -1653,11 +2009,13 @@
         stageTitle: document.getElementById("stageTitle"),
         stageSubtitle: document.getElementById("stageSubtitle"),
         stageSelect: document.getElementById("stageSelect"),
+        mobileStageSelect: document.getElementById("mobileStageSelect"),
         waveBriefBox: document.getElementById("waveBriefBox"),
         eventPill: document.getElementById("eventPill"),
         unlockPill: document.getElementById("unlockPill"),
         pathPill: document.getElementById("pathPill"),
         hoverBadge: document.getElementById("hoverBadge"),
+        mobileHintBadge: document.getElementById("mobileHintBadge"),
         phaseBadge: document.getElementById("phaseBadge"),
         fortressHpValue: document.getElementById("fortressHpValue"),
         scoreValue: document.getElementById("scoreValue"),
@@ -1667,7 +2025,9 @@
         dockGrid: document.getElementById("dockGrid"),
         buffStrip: document.getElementById("buffStrip"),
         cardRack: document.getElementById("cardRack"),
+        mobileDockGrid: document.getElementById("mobileDockGrid"),
         dragGhost: document.getElementById("dragGhost"),
+        profileModal: document.getElementById("profileModal"),
         introModal: document.getElementById("introModal"),
         infoModal: document.getElementById("infoModal"),
         infoTitle: document.getElementById("infoTitle"),
@@ -1682,6 +2042,8 @@
         summaryBody: document.getElementById("summaryBody"),
         leaderboardModal: document.getElementById("leaderboardModal"),
         enemyGuideModal: document.getElementById("enemyGuideModal"),
+        mobileStageModal: document.getElementById("mobileStageModal"),
+        mobileControlModal: document.getElementById("mobileControlModal"),
         enemyGuideGrid: document.getElementById("enemyGuideGrid"),
         playerName: document.getElementById("playerName"),
         playerRegion: document.getElementById("playerRegion"),
@@ -1694,6 +2056,7 @@
 
       const state = {
         progress: readProgress(),
+        uiProfile: readUiProfile(),
         mode: "stage",
         stageIndex: 0,
         stage: STAGES[0],
@@ -1759,12 +2122,46 @@
           state.progress.creatorUnlocked = true;
           saveProgress();
         }
-        ui.introModal.hidden = false;
+        applyUiProfile(state.uiProfile, false);
+        ui.profileModal.hidden = false;
+        ui.introModal.hidden = true;
         updateStageSelect();
         bindEvents();
         loadSelectedStage("stage-1");
         refreshLeaderboard();
         requestAnimationFrame(loop);
+      }
+
+      function readUiProfile() {
+        try {
+          const saved = localStorage.getItem(UI_PROFILE_KEY);
+          return saved === "mobile" ? "mobile" : "desktop";
+        } catch (error) {
+          return "desktop";
+        }
+      }
+
+      function saveUiProfile() {
+        localStorage.setItem(UI_PROFILE_KEY, state.uiProfile);
+      }
+
+      async function tryLockLandscape() {
+        try {
+          if (screen.orientation?.lock) await screen.orientation.lock("landscape");
+        } catch (error) {
+          // orientation lock is optional
+        }
+      }
+
+      function defaultHoverText() {
+        return state.uiProfile === "mobile" ? "長按單位可看資訊" : "滑鼠移入或手機長按可看資訊";
+      }
+
+      function applyUiProfile(profile, persist = true) {
+        state.uiProfile = profile === "mobile" ? "mobile" : "desktop";
+        document.body.classList.toggle("ui-mobile", state.uiProfile === "mobile");
+        document.body.classList.toggle("ui-desktop", state.uiProfile === "desktop");
+        if (persist) saveUiProfile();
       }
 
       function readProgress() {
@@ -1810,35 +2207,81 @@
 
       function updateStageSelect() {
         ui.stageSelect.innerHTML = "";
+        ui.mobileStageSelect.innerHTML = "";
         STAGES.forEach((stage) => {
           const option = document.createElement("option");
           option.value = `stage-${stage.id}`;
           option.textContent = `第 ${stage.id} 關：${stage.name}${stage.id > state.progress.unlockedStage ? "（未解鎖）" : ""}`;
           option.disabled = stage.id > state.progress.unlockedStage;
           ui.stageSelect.appendChild(option);
+          ui.mobileStageSelect.appendChild(option.cloneNode(true));
         });
         const endless = document.createElement("option");
         endless.value = "endless";
         endless.textContent = state.progress.clearedStages >= 4 ? "無限模式" : "無限模式（第 4 關後解鎖）";
         endless.disabled = state.progress.clearedStages < 4;
         ui.stageSelect.appendChild(endless);
+        ui.mobileStageSelect.appendChild(endless.cloneNode(true));
       }
 
       function bindEvents() {
+        document.getElementById("selectDesktopBtn").addEventListener("click", () => {
+          applyUiProfile("desktop");
+          ui.profileModal.hidden = true;
+          ui.introModal.hidden = false;
+          updateStageText();
+          refreshUi();
+        });
+        document.getElementById("selectMobileBtn").addEventListener("click", async () => {
+          applyUiProfile("mobile");
+          await tryLockLandscape();
+          ui.profileModal.hidden = true;
+          ui.introModal.hidden = false;
+          updateStageText();
+          refreshUi();
+        });
         document.getElementById("introBtn").addEventListener("click", () => { ui.introModal.hidden = false; });
         document.getElementById("closeIntroBtn").addEventListener("click", () => { ui.introModal.hidden = true; });
         document.getElementById("enemyGuideBtn").addEventListener("click", () => {
           renderEnemyGuide();
           ui.enemyGuideModal.hidden = false;
         });
+        document.getElementById("mobileGuideBtn").addEventListener("click", () => {
+          ui.mobileControlModal.hidden = true;
+          renderEnemyGuide();
+          ui.enemyGuideModal.hidden = false;
+        });
         document.getElementById("closeEnemyGuideBtn").addEventListener("click", () => { ui.enemyGuideModal.hidden = true; });
         document.getElementById("leaderboardBtn").addEventListener("click", () => { ui.leaderboardModal.hidden = false; });
+        document.getElementById("mobileLeaderboardBtn").addEventListener("click", () => {
+          ui.mobileControlModal.hidden = true;
+          ui.leaderboardModal.hidden = false;
+        });
         document.getElementById("closeLeaderboardBtn").addEventListener("click", () => { ui.leaderboardModal.hidden = true; });
+        document.getElementById("mobileIntroBtn").addEventListener("click", () => {
+          ui.mobileControlModal.hidden = true;
+          ui.introModal.hidden = false;
+        });
         document.getElementById("closeInfoBtn").addEventListener("click", closeInfoModal);
         document.getElementById("closeHandBtn").addEventListener("click", () => { ui.handModal.hidden = true; });
         ui.sellTowerBtn.addEventListener("click", sellInfoTower);
         document.getElementById("loadStageBtn").addEventListener("click", () => { loadSelectedStage(ui.stageSelect.value); });
+        document.getElementById("mobileLoadStageBtn").addEventListener("click", () => {
+          loadSelectedStage(ui.mobileStageSelect.value);
+          ui.mobileStageModal.hidden = true;
+        });
+        document.getElementById("mobileStageBtn").addEventListener("click", () => {
+          ui.mobileStageSelect.value = ui.stageSelect.value;
+          ui.mobileStageModal.hidden = false;
+        });
+        document.getElementById("closeMobileStageBtn").addEventListener("click", () => { ui.mobileStageModal.hidden = true; });
+        document.getElementById("mobileControlBtn").addEventListener("click", () => { ui.mobileControlModal.hidden = false; });
+        document.getElementById("closeMobileControlBtn").addEventListener("click", () => { ui.mobileControlModal.hidden = true; });
         document.getElementById("restartBtn").addEventListener("click", () => { loadSelectedStage(ui.stageSelect.value); });
+        document.getElementById("mobileRestartBtn").addEventListener("click", () => {
+          ui.mobileControlModal.hidden = true;
+          loadSelectedStage(ui.stageSelect.value);
+        });
         document.getElementById("clearSelectionBtn").addEventListener("click", clearDragState);
         document.getElementById("summaryReplayBtn").addEventListener("click", () => {
           ui.summaryModal.hidden = true;
@@ -1877,6 +2320,7 @@
 
       function loadSelectedStage(value) {
         ui.stageSelect.value = value;
+        ui.mobileStageSelect.value = value;
         if (value === "endless") {
           state.mode = "endless";
           state.stageIndex = Math.floor(Math.random() * STAGES.length);
@@ -1993,11 +2437,24 @@
       }
 
       function updateStageText() {
-        const title = state.mode === "stage" ? `第 ${state.stage.id} 關：${state.stage.name}` : `無限模式：${state.stage.name}`;
+        const title = state.uiProfile === "mobile"
+          ? state.mode === "stage" ? `第 ${state.stage.id} 關` : "無限模式"
+          : state.mode === "stage" ? `第 ${state.stage.id} 關：${state.stage.name}` : `無限模式：${state.stage.name}`;
         ui.stageTitle.textContent = title;
-        ui.stageSubtitle.textContent = state.mode === "stage"
-          ? `${state.stage.desc} 通過第 ${state.stage.id} 關後才能繼續解鎖。`
-          : "每波會持續加壓，地圖會在這張底圖上反覆改線。";
+        ui.stageSubtitle.textContent = state.uiProfile === "mobile"
+          ? state.mode === "stage" ? "3 波制，過關解鎖下一關。" : "壓力持續增長。"
+          : state.mode === "stage"
+            ? `3 波制｜${state.stage.desc}`
+            : "無限加壓｜每輪強度持續提升";
+      }
+
+      function formatWaveBrief(plan, phase) {
+        const prefix = phase === "prep" ? "整備倒數" : "戰鬥進行中";
+        if (state.uiProfile === "mobile") {
+          const eventText = plan.event ? `事件：${plan.event.label}` : "本波無額外事件";
+          return `<strong>${prefix}</strong> ${eventText}。`;
+        }
+        return `<strong>${prefix}</strong>`;
       }
 
       function prepareWave() {
@@ -2011,8 +2468,10 @@
         state.tempEffects.enemyCounterAttack = state.wavePlan.enemyCounterAttack;
         state.tempEffects.fortressDamageBonus = state.wavePlan.fortressDamageBonus;
         updateCurrentPath();
-        ui.waveBriefBox.innerHTML = `<strong>${state.phase === "prep" ? "整備倒數" : "戰鬥進行中"}</strong> ${state.wavePlan.brief}`;
-        ui.eventPill.textContent = `事件：${state.event ? state.event.label : "尚未觸發"}`;
+        ui.waveBriefBox.innerHTML = formatWaveBrief(state.wavePlan, state.phase);
+        ui.eventPill.textContent = state.uiProfile === "mobile"
+          ? `事件 ${state.event ? state.event.label : "無"}`
+          : `事件：${state.event ? state.event.label : "尚未觸發"}`;
         renderCardRack();
       }
 
@@ -2114,8 +2573,8 @@
       function startWave() {
         state.phase = "combat";
         state.spawnQueue = state.wavePlan.spawns.map((spawn) => ({ ...spawn }));
-        ui.phaseBadge.textContent = "階段：戰鬥中";
-        ui.waveBriefBox.innerHTML = `<strong>戰鬥中</strong> ${state.wavePlan.brief}`;
+        ui.phaseBadge.textContent = state.uiProfile === "mobile" ? "戰鬥中" : "階段：戰鬥中";
+        ui.waveBriefBox.innerHTML = formatWaveBrief(state.wavePlan, "combat");
       }
 
       function loop(now) {
@@ -3500,6 +3959,7 @@
         const unlockedCount = towerUnlockCount();
         ui.unlockPill.textContent = `塔種解鎖：${unlockedCount} / 9`;
         ui.dockGrid.innerHTML = "";
+        ui.mobileDockGrid.innerHTML = "";
         UTILITY_ITEMS.forEach((tool) => {
           const node = document.createElement("div");
           node.className = `tower-card${state.drag?.toolKey === tool.key ? " dragging" : ""}`;
@@ -3521,9 +3981,28 @@
             ui.hoverBadge.textContent = `${tool.label}｜${utilitySummary(tool)}`;
           });
           node.addEventListener("mouseleave", () => {
-            if (!state.drag?.active) ui.hoverBadge.textContent = "滑鼠移入或手機長按可看資訊";
+            if (!state.drag?.active) ui.hoverBadge.textContent = defaultHoverText();
           });
           ui.dockGrid.appendChild(node);
+
+          const mobileNode = document.createElement("div");
+          mobileNode.className = `mobile-tower-card${state.drag?.toolKey === tool.key ? " dragging" : ""}`;
+          mobileNode.innerHTML = `
+            <div class="tower-icon" style="background:${tool.color}">${tool.icon}</div>
+            <div class="mobile-card-label"><strong>${tool.label}</strong><span>${tool.cost}</span></div>
+          `;
+          mobileNode.addEventListener("pointerdown", (event) => startUtilityPress(event, tool));
+          mobileNode.addEventListener("mouseenter", () => {
+            ui.hoverBadge.textContent = `${tool.label}｜${utilitySummary(tool)}`;
+            ui.mobileHintBadge.textContent = `${tool.label}｜${utilitySummary(tool)}`;
+          });
+          mobileNode.addEventListener("mouseleave", () => {
+            if (!state.drag?.active) {
+              ui.hoverBadge.textContent = defaultHoverText();
+              ui.mobileHintBadge.textContent = defaultHoverText();
+            }
+          });
+          ui.mobileDockGrid.appendChild(mobileNode);
         });
         RECRUITS.forEach((recruit, index) => {
           const unlocked = index < unlockedCount;
@@ -3548,7 +4027,7 @@
               ui.hoverBadge.textContent = `${recruit.label}｜價 ${recruit.cost}｜${recruit.pattern}`;
             });
             div.addEventListener("mouseleave", () => {
-              if (!state.drag?.active) ui.hoverBadge.textContent = "滑鼠移入或手機長按可看資訊";
+              if (!state.drag?.active) ui.hoverBadge.textContent = defaultHoverText();
             });
           } else {
             div.innerHTML = `
@@ -3560,10 +4039,43 @@
               ui.hoverBadge.textContent = "尚未解鎖的新部署單位";
             });
             div.addEventListener("mouseleave", () => {
-              if (!state.drag?.active) ui.hoverBadge.textContent = "滑鼠移入或手機長按可看資訊";
+              if (!state.drag?.active) ui.hoverBadge.textContent = defaultHoverText();
             });
           }
           ui.dockGrid.appendChild(div);
+
+          const mobileDiv = document.createElement("div");
+          mobileDiv.className = `mobile-tower-card${unlocked && state.drag?.recruitKey === recruit.key ? " dragging" : ""}${unlocked ? "" : " locked"}`;
+          mobileDiv.innerHTML = `
+            <div class="tower-icon" style="background:${unlocked ? recruit.color : "#9ea5a4"};color:${unlocked ? "#fff" : "#eef1ef"}">${recruit.icon}</div>
+            <div class="mobile-card-label"><strong>${unlocked ? recruit.label : "未解鎖"}</strong><span>${unlocked ? recruit.cost : "?"}</span></div>
+          `;
+          if (unlocked) {
+            mobileDiv.addEventListener("pointerdown", (event) => startCardPress(event, recruit));
+            mobileDiv.addEventListener("mouseenter", () => {
+              const text = `${recruit.label}｜價 ${recruit.cost}｜${recruit.pattern}`;
+              ui.hoverBadge.textContent = text;
+              ui.mobileHintBadge.textContent = text;
+            });
+            mobileDiv.addEventListener("mouseleave", () => {
+              if (!state.drag?.active) {
+                ui.hoverBadge.textContent = defaultHoverText();
+                ui.mobileHintBadge.textContent = defaultHoverText();
+              }
+            });
+          } else {
+            mobileDiv.addEventListener("mouseenter", () => {
+              ui.hoverBadge.textContent = "尚未解鎖的新部署單位";
+              ui.mobileHintBadge.textContent = "尚未解鎖的新部署單位";
+            });
+            mobileDiv.addEventListener("mouseleave", () => {
+              if (!state.drag?.active) {
+                ui.hoverBadge.textContent = defaultHoverText();
+                ui.mobileHintBadge.textContent = defaultHoverText();
+              }
+            });
+          }
+          ui.mobileDockGrid.appendChild(mobileDiv);
         });
       }
 
@@ -3582,7 +4094,7 @@
             : "目前沒有可用支援卡";
         });
         launcher.addEventListener("mouseleave", () => {
-          if (!state.drag?.active) ui.hoverBadge.textContent = "滑鼠移入或手機長按可看資訊";
+          if (!state.drag?.active) ui.hoverBadge.textContent = defaultHoverText();
         });
         ui.cardRack.appendChild(launcher);
 
@@ -3651,6 +4163,10 @@
       }
 
       function refreshUi() {
+        const setHint = (text) => {
+          ui.hoverBadge.textContent = text;
+          ui.mobileHintBadge.textContent = text;
+        };
         ui.fortressHpValue.textContent = `${Math.round(state.fortressHp)} / ${state.fortressHpMax}`;
         ui.scoreValue.textContent = `${Math.round(state.score)}`;
         ui.killsValue.textContent = `${state.kills}`;
@@ -3666,26 +4182,27 @@
               : state.phase === "victory"
                 ? "通關"
                 : "失守";
-        ui.phaseBadge.textContent = `階段：${state.phase === "prep" ? "整備倒數" : state.phase === "combat" ? "戰鬥中" : state.phase === "reward" ? "選卡中" : state.phase === "victory" ? "通關" : "失守"}`;
+        const phaseLabel = state.phase === "prep" ? "整備倒數" : state.phase === "combat" ? "戰鬥中" : state.phase === "reward" ? "選卡中" : state.phase === "victory" ? "通關" : "失守";
+        ui.phaseBadge.textContent = state.uiProfile === "mobile" ? phaseLabel.replace("整備倒數", "整備") : `階段：${phaseLabel}`;
         if (state.drag?.active && state.hoverCell) {
           if (state.drag.kind === "tower") {
             const tower = state.towers.find((item) => item.id === state.drag.towerId);
             const targetTower = towerAt(state.hoverCell.col, state.hoverCell.row);
             if (tower && targetTower && targetTower.id !== tower.id) {
-              ui.hoverBadge.textContent = targetTower.recruitKey !== tower.recruitKey
+              setHint(targetTower.recruitKey !== tower.recruitKey
                 ? "不同類塔不能直接融合"
                 : towerLevel(targetTower) !== towerLevel(tower)
                   ? "場上融合必須是同類、同段塔"
-                  : `可直接融合｜${RECRUIT_MAP[tower.recruitKey].label} 會升到第 ${Math.min(5, towerLevel(targetTower) + 1)} 段並回滿耐久`;
+                  : `可直接融合｜${RECRUIT_MAP[tower.recruitKey].label} 會升到第 ${Math.min(5, towerLevel(targetTower) + 1)} 段並回滿耐久`);
             } else {
-              ui.hoverBadge.textContent = tower && canMoveTowerTo(tower, state.hoverCell.col, state.hoverCell.row)
+              setHint(tower && canMoveTowerTo(tower, state.hoverCell.col, state.hoverCell.row)
                 ? `可移動到 (${state.hoverCell.col + 1}, ${state.hoverCell.row + 1})`
-                : "此處移動會封死路線";
+                : "此處移動會封死路線");
             }
           } else if (state.drag.kind === "utility") {
-            ui.hoverBadge.textContent = isExpandableCell(state.hoverCell.col, state.hoverCell.row)
+            setHint(isExpandableCell(state.hoverCell.col, state.hoverCell.row)
               ? `可開墾可改線塔位 (${state.hoverCell.col + 1}, ${state.hoverCell.row + 1})`
-              : "這裡不能開墾成新塔位";
+              : "這裡不能開墾成新塔位");
           } else {
             const targetTower = towerAt(state.hoverCell.col, state.hoverCell.row);
             const recruit = RECRUIT_MAP[state.drag.recruitKey];
@@ -3693,40 +4210,40 @@
               const currentIndex = recruitIndex(targetTower.recruitKey);
               const targetIndex = recruitIndex(recruit.key);
               if (targetIndex < currentIndex) {
-                ui.hoverBadge.textContent = "不能把較低職級拖到更高等塔位";
+                setHint("不能把較低職級拖到更高等塔位");
               } else if (targetIndex === currentIndex) {
-                ui.hoverBadge.textContent = targetTower.star >= 4
+                setHint(targetTower.star >= 4
                   ? "這座塔已經達到第 5 段"
-                  : `可合成｜需 ${fusionCostForTower(targetTower)} 積分｜升段後回滿耐久`;
+                  : `可合成｜需 ${fusionCostForTower(targetTower)} 積分｜升段後回滿耐久`);
               } else {
                 const diff = recruit.cost - RECRUIT_MAP[targetTower.recruitKey].cost;
-                ui.hoverBadge.textContent = `可升職｜需 ${diff} 積分｜接手後回滿耐久`;
+                setHint(`可升職｜需 ${diff} 積分｜接手後回滿耐久`);
               }
             } else {
-              ui.hoverBadge.textContent = canBlockAt(state.hoverCell.col, state.hoverCell.row)
+              setHint(canBlockAt(state.hoverCell.col, state.hoverCell.row)
                 ? `可部署 (${state.hoverCell.col + 1}, ${state.hoverCell.row + 1})`
-                : "此處會封死路線";
+                : "此處會封死路線");
             }
           }
         } else if (state.hoverTowerId) {
           const tower = state.towers.find((item) => item.id === state.hoverTowerId);
           if (tower) {
             const recruit = RECRUIT_MAP[tower.recruitKey];
-            ui.hoverBadge.textContent = state.hoverSellTowerId === tower.id
+            setHint(state.hoverSellTowerId === tower.id
               ? `點擊賣塔｜返還 ${sellValueForTower(tower)} 積分`
-              : `${recruit.label}｜${recruit.pattern}｜第 ${towerLevel(tower)} 段｜耐久 ${Math.round(tower.hp)} / ${tower.maxHp}｜可賣 ${sellValueForTower(tower)}`;
+              : `${recruit.label}｜${recruit.pattern}｜第 ${towerLevel(tower)} 段｜耐久 ${Math.round(tower.hp)} / ${tower.maxHp}｜可賣 ${sellValueForTower(tower)}`);
           } else {
-            ui.hoverBadge.textContent = "滑鼠移入或手機長按可看資訊";
+            setHint(defaultHoverText());
           }
         } else if (state.hoverEnemyId) {
           const enemy = state.enemies.find((item) => item.id === state.hoverEnemyId);
           if (enemy) {
-            ui.hoverBadge.textContent = `${ENEMIES[enemy.enemyKey].label}｜${enemyTraitSummary(enemy)}`;
+            setHint(`${ENEMIES[enemy.enemyKey].label}｜${enemyTraitSummary(enemy)}`);
           } else {
-            ui.hoverBadge.textContent = "滑鼠移入或手機長按可看資訊";
+            setHint(defaultHoverText());
           }
         } else {
-          ui.hoverBadge.textContent = "滑鼠移入或手機長按可看資訊";
+          setHint(defaultHoverText());
         }
         renderBuffStrip();
         ui.submitScoreBtn.disabled = !(state.phase === "victory" || state.phase === "over") || state.levelSubmitted;
