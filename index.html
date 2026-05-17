@@ -2323,7 +2323,7 @@
         paused: false,
         rewardOptions: [],
         lastFrame: performance.now(),
-        lastLoopAt: 0,
+        loopHandle: null,
         levelSubmitted: false,
       };
 
@@ -2351,12 +2351,16 @@
         updateViewportMetrics();
         loadSelectedStage("stage-1");
         refreshLeaderboard();
-        state.lastLoopAt = performance.now();
-        requestAnimationFrame(loop);
-        window.setInterval(() => {
-          const now = performance.now();
-          if (now - state.lastLoopAt > 120) loop(now);
-        }, 120);
+        startLoop();
+      }
+
+      function startLoop() {
+        if (state.loopHandle) window.clearInterval(state.loopHandle);
+        state.lastFrame = performance.now();
+        loop(state.lastFrame);
+        state.loopHandle = window.setInterval(() => {
+          loop(performance.now());
+        }, 33);
       }
 
       function readUiProfile() {
@@ -2516,6 +2520,7 @@
             await tryLockLandscape();
             updateViewportMetrics();
           }
+          state.lastFrame = performance.now();
           ui.introModal.hidden = true;
         });
         document.getElementById("enemyGuideBtn").addEventListener("click", () => {
@@ -2867,7 +2872,6 @@
       }
 
       function loop(now) {
-        state.lastLoopAt = now;
         const dt = Math.min((now - state.lastFrame) / 1000, 0.033);
         state.lastFrame = now;
         try {
@@ -2878,10 +2882,13 @@
           console.error(error);
           return;
         }
-        requestAnimationFrame(loop);
       }
 
       function update(dt) {
+        if (!ui.profileModal.hidden || !ui.introModal.hidden) {
+          refreshUi();
+          return;
+        }
         if (state.paused) {
           refreshUi();
           return;
