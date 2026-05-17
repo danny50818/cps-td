@@ -2349,9 +2349,16 @@
         updateStageSelect();
         bindEvents();
         updateViewportMetrics();
-        loadSelectedStage("stage-1");
-        refreshLeaderboard();
         startLoop();
+        try {
+          loadSelectedStage("stage-1");
+        } catch (error) {
+          console.error(error);
+          ui.eventPill.textContent = `初始化錯誤：${error.message}`;
+        }
+        refreshLeaderboard().catch((error) => {
+          console.error(error);
+        });
       }
 
       function startLoop() {
@@ -4478,19 +4485,23 @@
       }
 
       function refreshUi() {
-        const setHint = (text) => {
-          ui.hoverBadge.textContent = text;
-          ui.mobileHintBadge.textContent = text;
+        const setText = (node, text) => {
+          if (node) node.textContent = text;
         };
-        ui.fortressHpValue.textContent = `${Math.round(state.fortressHp)} / ${state.fortressHpMax}`;
-        ui.scoreValue.textContent = `${Math.round(state.score)}`;
-        ui.mobileScoreValue.textContent = `${Math.round(state.score)}`;
-        ui.killsValue.textContent = `${state.kills}`;
-        ui.waveValue.textContent = state.mode === "stage"
+        const setHint = (text) => {
+          setText(ui.hoverBadge, text);
+          setText(ui.mobileHintBadge, text);
+        };
+        setText(ui.fortressHpValue, `${Math.round(state.fortressHp)} / ${state.fortressHpMax}`);
+        setText(ui.scoreValue, `${Math.round(state.score)}`);
+        setText(ui.mobileScoreValue, `${Math.round(state.score)}`);
+        setText(ui.killsValue, `${state.kills}`);
+        const waveText = state.mode === "stage"
           ? `${state.stageWave} / 3`
           : `${state.endlessWave} / ∞`;
-        ui.mobileWaveValue.textContent = state.waveValue.textContent;
-        ui.countdownValue.textContent = state.phase === "prep"
+        setText(ui.waveValue, waveText);
+        setText(ui.mobileWaveValue, waveText);
+        let countdownText = state.phase === "prep"
           ? `${Math.ceil(Math.max(0, state.countdown))}s`
           : state.phase === "combat"
             ? "進行中"
@@ -4499,11 +4510,12 @@
               : state.phase === "victory"
                 ? "通關"
                 : "失守";
-        if (state.paused) ui.countdownValue.textContent = "已暫停";
+        if (state.paused) countdownText = "已暫停";
+        setText(ui.countdownValue, countdownText);
         const phaseLabel = state.paused
           ? "已暫停"
           : state.phase === "prep" ? "整備倒數" : state.phase === "combat" ? "戰鬥中" : state.phase === "reward" ? "選卡中" : state.phase === "victory" ? "通關" : "失守";
-        ui.phaseBadge.textContent = state.uiProfile === "mobile" ? phaseLabel.replace("整備倒數", "整備") : `階段：${phaseLabel}`;
+        setText(ui.phaseBadge, state.uiProfile === "mobile" ? phaseLabel.replace("整備倒數", "整備") : `階段：${phaseLabel}`);
         if (state.drag?.active && state.hoverCell) {
           if (state.drag.kind === "tower") {
             const tower = state.towers.find((item) => item.id === state.drag.towerId);
@@ -4566,10 +4578,13 @@
           setHint(defaultHoverText());
         }
         renderBuffStrip();
-        ui.submitScoreBtn.disabled = !(state.phase === "victory" || state.phase === "over") || state.levelSubmitted;
+        if (ui.submitScoreBtn) {
+          ui.submitScoreBtn.disabled = !(state.phase === "victory" || state.phase === "over") || state.levelSubmitted;
+        }
       }
 
       function renderBuffStrip() {
+        if (!ui.buffStrip) return;
         const items = [];
         if (state.tempEffects.traumaTimer > 0) items.push(`創傷知情 ${Math.ceil(state.tempEffects.traumaTimer)}s`);
         if (state.tempEffects.focusTimer > 0) items.push(`跨網協作 ${Math.ceil(state.tempEffects.focusTimer)}s`);
