@@ -739,7 +739,7 @@
       .board-head,
       .board-row {
         display: grid;
-        grid-template-columns: 34px 1fr 72px 58px;
+        grid-template-columns: 34px 1fr 58px 72px 58px;
         gap: 8px;
         align-items: center;
       }
@@ -752,6 +752,48 @@
 
       .rank {
         color: var(--accent);
+        font-weight: 800;
+      }
+
+      .board-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin: 0 0 12px;
+      }
+
+      .board-mode {
+        padding: 8px 12px;
+        min-height: 36px;
+        border-radius: 999px;
+        border: 1px solid #d8c7ad;
+        background: #fff8ec;
+        color: var(--muted);
+      }
+
+      .board-mode.active {
+        border-color: var(--accent);
+        background: #26343c;
+        color: #fff8ea;
+      }
+
+      .board-status {
+        margin-left: auto;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .board-badge {
+        display: inline-flex;
+        align-items: center;
+        min-width: 42px;
+        justify-content: center;
+        padding: 3px 7px;
+        border-radius: 999px;
+        background: #eef3ee;
+        color: #52615a;
+        font-size: 11px;
         font-weight: 800;
       }
 
@@ -1560,6 +1602,11 @@
     <div class="modal" id="leaderboardModal" hidden>
       <div class="dialog">
         <h2>全球排行榜</h2>
+        <div class="board-toolbar" role="tablist" aria-label="排行榜模式">
+          <button class="board-mode" id="globalBoardBtn" type="button" role="tab">全球</button>
+          <button class="board-mode" id="localBoardBtn" type="button" role="tab">本機</button>
+          <span class="board-status" id="boardStatus">準備中</span>
+        </div>
         <div class="form-grid">
           <input id="playerName" maxlength="16" placeholder="玩家名稱" />
           <input id="playerRegion" maxlength="18" placeholder="地區，例如 Taipei" />
@@ -1572,6 +1619,7 @@
           <div class="board-head">
             <div>#</div>
             <div>玩家</div>
+            <div>模式</div>
             <div>分數</div>
             <div>波次</div>
           </div>
@@ -1632,6 +1680,7 @@
 
       const PROGRESS_KEY = "frontline-guardian-progress";
       const UI_PROFILE_KEY = "frontline-guardian-ui-profile";
+      const LEADERBOARD_MODE_KEY = "frontline-guardian-leaderboard-mode";
       const SCORE_KEY = "frontline-guardian-v4-scores";
       const GRID = { cols: 12, rows: 8, cell: 60 };
       const WAVE_COUNTS = [7, 10, 13];
@@ -2274,16 +2323,20 @@
         enemyGuideGrid: document.getElementById("enemyGuideGrid"),
         playerName: document.getElementById("playerName"),
         playerRegion: document.getElementById("playerRegion"),
+        globalBoardBtn: document.getElementById("globalBoardBtn"),
+        localBoardBtn: document.getElementById("localBoardBtn"),
         submitScoreBtn: document.getElementById("submitScoreBtn"),
         refreshBoardBtn: document.getElementById("refreshBoardBtn"),
         leaderboard: document.getElementById("leaderboard"),
         boardNote: document.getElementById("boardNote"),
+        boardStatus: document.getElementById("boardStatus"),
         toast: document.getElementById("toast"),
       };
 
       const state = {
         progress: readProgress(),
         uiProfile: readUiProfile(),
+        leaderboardMode: readLeaderboardMode(),
         mode: "stage",
         stageIndex: 0,
         stage: STAGES[0],
@@ -2401,6 +2454,20 @@
 
       function saveUiProfile() {
         localStorage.setItem(UI_PROFILE_KEY, state.uiProfile);
+      }
+
+      function readLeaderboardMode() {
+        try {
+          const saved = localStorage.getItem(LEADERBOARD_MODE_KEY);
+          if (saved === "local") return "local";
+        } catch (error) {
+          return LEADERBOARD_CONFIG.endpoint ? "global" : "local";
+        }
+        return LEADERBOARD_CONFIG.endpoint ? "global" : "local";
+      }
+
+      function saveLeaderboardMode() {
+        localStorage.setItem(LEADERBOARD_MODE_KEY, state.leaderboardMode);
       }
 
       async function tryLockLandscape() {
@@ -2571,10 +2638,14 @@
           ui.enemyGuideModal.hidden = false;
         });
         document.getElementById("closeEnemyGuideBtn").addEventListener("click", () => { ui.enemyGuideModal.hidden = true; });
-        document.getElementById("leaderboardBtn").addEventListener("click", () => { ui.leaderboardModal.hidden = false; });
+        document.getElementById("leaderboardBtn").addEventListener("click", () => {
+          ui.leaderboardModal.hidden = false;
+          refreshLeaderboard();
+        });
         document.getElementById("mobileLeaderboardBtn").addEventListener("click", () => {
           ui.mobileControlModal.hidden = true;
           ui.leaderboardModal.hidden = false;
+          refreshLeaderboard();
         });
         document.getElementById("closeLeaderboardBtn").addEventListener("click", () => { ui.leaderboardModal.hidden = true; });
         document.getElementById("mobileIntroBtn").addEventListener("click", () => {
@@ -2617,6 +2688,8 @@
           }
         });
         document.getElementById("summaryCloseBtn").addEventListener("click", () => { ui.summaryModal.hidden = true; });
+        ui.globalBoardBtn.addEventListener("click", () => setLeaderboardMode("global"));
+        ui.localBoardBtn.addEventListener("click", () => setLeaderboardMode("local"));
         ui.submitScoreBtn.addEventListener("click", submitScore);
         ui.refreshBoardBtn.addEventListener("click", refreshLeaderboard);
         canvas.addEventListener("pointerdown", onCanvasPointerDown);
@@ -5123,10 +5196,18 @@
         }
       }
 
+      function sortLeaderboard(entries) {
+        return entries.sort((a, b) => (b.score || 0) - (a.score || 0) || (b.wave || 0) - (a.wave || 0));
+      }
+
+      function topLocalScores(limit = 10) {
+        return sortLeaderboard(localScores()).slice(0, limit);
+      }
+
       function saveLocalScore(entry) {
         const scores = localScores();
         scores.push(entry);
-        scores.sort((a, b) => b.score - a.score || b.wave - a.wave);
+        sortLeaderboard(scores);
         localStorage.setItem(SCORE_KEY, JSON.stringify(scores.slice(0, 40)));
       }
 
@@ -5149,6 +5230,7 @@
           wave: state.mode === "stage" ? state.stageWave : state.endlessWave,
           outcome: state.phase,
           stage: state.mode === "stage" ? state.stage.id : "endless",
+          mode: state.mode,
           timestamp: new Date().toISOString(),
         };
         saveLocalScore(entry);
@@ -5166,6 +5248,8 @@
               }),
             });
             if (!response.ok) throw new Error(`Leaderboard sync failed: ${response.status}`);
+            state.leaderboardMode = "global";
+            saveLeaderboardMode();
             toast("成績已同步到全球排行榜。");
           } catch (error) {
             toast("遠端同步失敗，已保留本機成績。");
@@ -5176,21 +5260,56 @@
       }
 
       async function refreshLeaderboard() {
-        let entries = localScores().slice(0, 10);
-        if (LEADERBOARD_CONFIG.endpoint) {
-          try {
-            const response = await fetch(`${LEADERBOARD_CONFIG.endpoint}?action=leaderboard&gameId=${encodeURIComponent(LEADERBOARD_CONFIG.gameId)}`);
-            if (!response.ok) throw new Error(`Leaderboard read failed: ${response.status}`);
-            const data = await response.json();
-            entries = data.leaderboard || entries;
-            ui.boardNote.textContent = "目前顯示遠端全球排行榜。";
-          } catch (error) {
-            ui.boardNote.textContent = "遠端排行榜讀取失敗，已退回本機排行榜。";
-          }
-        } else {
-          ui.boardNote.textContent = "未設定遠端端點，因此顯示本機排行榜。";
+        renderLeaderboardModeControls("讀取中");
+        if (state.leaderboardMode === "local") {
+          ui.boardNote.textContent = "目前顯示這台裝置保存的本機排行榜。";
+          renderLeaderboard(topLocalScores(10));
+          renderLeaderboardModeControls("本機");
+          return;
         }
-        renderLeaderboard(entries);
+
+        let entries = topLocalScores(10);
+        if (!LEADERBOARD_CONFIG.endpoint) {
+          ui.boardNote.textContent = "全球排行榜需要從 Render 網址開啟；目前顯示本機備援。";
+          renderLeaderboard(entries);
+          renderLeaderboardModeControls("離線");
+          return;
+        }
+
+        try {
+          const response = await fetch(`${LEADERBOARD_CONFIG.endpoint}?action=leaderboard&gameId=${encodeURIComponent(LEADERBOARD_CONFIG.gameId)}`);
+          if (!response.ok) throw new Error(`Leaderboard read failed: ${response.status}`);
+          const data = await response.json();
+          entries = data.leaderboard || [];
+          ui.boardNote.textContent = data.source === "database"
+            ? "目前顯示 Render Postgres 全球排行榜。"
+            : "目前顯示伺服器記憶體排行榜；請確認 Render 已建立 Postgres。";
+          renderLeaderboard(entries);
+          renderLeaderboardModeControls(data.source === "database" ? "全球" : "暫存");
+        } catch (error) {
+          ui.boardNote.textContent = "遠端排行榜讀取失敗，已退回本機備援。";
+          renderLeaderboard(entries);
+          renderLeaderboardModeControls("連線失敗");
+        }
+      }
+
+      function setLeaderboardMode(mode) {
+        state.leaderboardMode = mode === "local" ? "local" : "global";
+        saveLeaderboardMode();
+        refreshLeaderboard();
+      }
+
+      function renderLeaderboardModeControls(statusText) {
+        const globalActive = state.leaderboardMode === "global";
+        ui.globalBoardBtn.classList.toggle("active", globalActive);
+        ui.localBoardBtn.classList.toggle("active", !globalActive);
+        ui.globalBoardBtn.setAttribute("aria-selected", String(globalActive));
+        ui.localBoardBtn.setAttribute("aria-selected", String(!globalActive));
+        ui.boardStatus.textContent = statusText || (globalActive ? "全球" : "本機");
+      }
+
+      function runModeLabel(entry) {
+        return entry.mode === "endless" || String(entry.stage || "").toLowerCase() === "endless" ? "無限" : "關卡";
       }
 
       function renderLeaderboard(entries) {
@@ -5198,12 +5317,13 @@
           <div class="board-head">
             <div>#</div>
             <div>玩家</div>
+            <div>模式</div>
             <div>分數</div>
             <div>波次</div>
           </div>
         `;
         if (!entries.length) {
-          ui.leaderboard.innerHTML += `<div class="board-row"><div class="rank">-</div><div>尚無資料</div><div>0</div><div>0</div></div>`;
+          ui.leaderboard.innerHTML += `<div class="board-row"><div class="rank">-</div><div>尚無資料</div><div><span class="board-badge">-</span></div><div>0</div><div>0</div></div>`;
           return;
         }
         entries.forEach((entry, index) => {
@@ -5211,6 +5331,7 @@
             <div class="board-row">
               <div class="rank">${index + 1}</div>
               <div>${escapeHtml(entry.name || "匿名")} ${entry.region ? `<span style="color:#6e787d;font-size:11px">/${escapeHtml(entry.region)}</span>` : ""}</div>
+              <div><span class="board-badge">${runModeLabel(entry)}</span></div>
               <div>${Math.round(entry.score || 0)}</div>
               <div>${entry.wave || 0}</div>
             </div>

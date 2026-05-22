@@ -27,6 +27,19 @@ function normalizedGameId(value) {
   return input.slice(0, 64) || GAME_ID;
 }
 
+function normalizedTimestamp(value) {
+  const date = value ? new Date(value) : new Date();
+  return Number.isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString();
+}
+
+function normalizedRunMode(value, stage) {
+  const input = String(value || "").trim().toLowerCase();
+  if (input === "endless" || String(stage || "").trim().toLowerCase() === "endless") {
+    return "endless";
+  }
+  return "stage";
+}
+
 function normalizedEntry(payload) {
   return {
     gameId: normalizedGameId(payload.gameId),
@@ -36,7 +49,8 @@ function normalizedEntry(payload) {
     wave: Math.max(0, Math.round(Number(payload.wave) || 0)),
     outcome: String(payload.outcome || "").trim().slice(0, 16),
     stage: String(payload.stage || "").trim().slice(0, 24),
-    timestamp: payload.timestamp ? new Date(payload.timestamp).toISOString() : new Date().toISOString(),
+    mode: normalizedRunMode(payload.mode, payload.stage),
+    timestamp: normalizedTimestamp(payload.timestamp),
   };
 }
 
@@ -52,8 +66,13 @@ async function ensureSchema() {
       wave integer not null,
       outcome text,
       stage text,
+      run_mode text not null default 'stage',
       created_at timestamptz not null default now()
     );
+  `);
+  await pool.query(`
+    alter table leaderboard_entries
+      add column if not exists run_mode text not null default 'stage';
   `);
   await pool.query(`
     create index if not exists leaderboard_entries_game_id_score_idx
@@ -70,8 +89,8 @@ async function writeEntry(entry) {
   }
   await pool.query(
     `insert into leaderboard_entries
-      (game_id, player_name, region, score, wave, outcome, stage, created_at)
-     values ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      (game_id, player_name, region, score, wave, outcome, stage, run_mode, created_at)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
     [
       entry.gameId,
       entry.name,
@@ -80,6 +99,7 @@ async function writeEntry(entry) {
       entry.wave,
       entry.outcome,
       entry.stage,
+      entry.mode,
       entry.timestamp,
     ],
   );
@@ -99,6 +119,7 @@ async function readLeaderboard(gameId) {
         wave,
         outcome,
         stage,
+        run_mode as mode,
         created_at as timestamp
      from leaderboard_entries
      where game_id = $1
@@ -110,14 +131,18 @@ async function readLeaderboard(gameId) {
 }
 
 app.get("/healthz", (_req, res) => {
-  res.json({ ok: true, database: !!pool });
+  res.json({ ok: true, leaderboard: pool ? "database" : "memory", database: !!pool });
 });
 
 app.get("/api/leaderboard", async (req, res) => {
   try {
     const gameId = normalizedGameId(req.query.gameId);
     const leaderboard = await readLeaderboard(gameId);
-    res.json({ leaderboard });
+    res.json({
+      leaderboard,
+      source: pool ? "database" : "memory",
+      updatedAt: new Date().toISOString(),
+    });
   } catch (error) {
     console.error("Leaderboard read failed", error);
     res.status(500).json({ error: "leaderboard_read_failed" });
@@ -128,7 +153,7 @@ app.post("/api/leaderboard", async (req, res) => {
   try {
     const payload = normalizedEntry(req.body || {});
     await writeEntry(payload);
-    res.status(201).json({ ok: true });
+    res.status(201).json({ ok: true, source: pool ? "database" : "memory" });
   } catch (error) {
     console.error("Leaderboard write failed", error);
     res.status(500).json({ error: "leaderboard_write_failed" });
